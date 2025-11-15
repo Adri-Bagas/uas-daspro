@@ -1,10 +1,15 @@
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <stdio.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
 #include "./sqlite/sqlite3.h"
+
+#ifdef _WIN32
+    #include <direct.h>
+#else
+    #include <sys/stat.h>
+    #include <sys/types.h>
+#endif
 
 // typedef struct Company {
 //     int id;
@@ -30,7 +35,7 @@
 
 //     char* tmpName =  argv[1] ? argv[1] : (char *)"NULL";
 //     tmp->name = (char *)malloc(strlen(tmpName) + 1);
-    
+
 //     if(tmp->name) {
 //         strcpy(tmp->name, tmpName);
 //     }
@@ -39,7 +44,7 @@
 
 //     char* tmpAddress =  argv[3] ? argv[3] : (char *)"NULL";
 //     tmp->address = (char *)malloc(strlen(tmpAddress) + 1);
-    
+
 //     if(tmp->address) {
 //         strcpy(tmp->address, tmpAddress);
 //     }
@@ -55,10 +60,17 @@ int main(int argc, char *argv[])
     char *zErrMsg = 0;
     int rc;
     char *sql;
+    int result = -1;
 
     const char *folder = "./data";
 
-    if (mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO) == -1)
+    #ifdef _WIN32
+        result = _mkdir(folder);
+    #else
+        result = mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO);
+    #endif
+
+    if (result == -1)
     {
         if (errno == EEXIST)
         {
