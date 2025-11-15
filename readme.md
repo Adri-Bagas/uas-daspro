@@ -1,0 +1,1 @@
+gcc ./main.c ./sqlite/sqlite3.c -o main.exe
