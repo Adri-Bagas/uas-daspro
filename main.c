@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
     if (rc)
     {
         fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
-        return (0);
+        return 0;
     }
     else
     {
