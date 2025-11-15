@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
         printf("Folder '%s' created successfully.\n", folder);
     }
 
-    rc = sqlite3_open("./data/test_1.db", &db);
+    rc = sqlite3_open("./data/example.db", &db);
 
     if (rc)
     {
