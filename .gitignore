@@ -1,0 +1,28 @@
+# --- Compiled Executables ---
+program
+program.exe
+*.out
+*.app
+
+# --- Object Files (Intermediate compilation) ---
+*.o
+*.obj
+
+# --- Database Files (Don't commit real data) ---
+*.db
+*.sqlite
+*.sqlite3
+# SQLite journal files (temporary lock files)
+*.db-journal
+*.db-wal
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+
+# --- Editor/IDE Settings ---
+.vscode/
+.idea/
+*.swp
+
+data/
