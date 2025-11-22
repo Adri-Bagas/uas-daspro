@@ -1,7 +1,9 @@
 # COMPILATION COMMAND EXPLANATION:
 # gcc             : The compiler
 # main.c          : main application
-# db/db.c         : modular database wrapper
+# main.c          : main application
+# feat/init.c     : the init command
+# feat/help.c     : the help command
 # db/migrations.c : migration logic (NEW)
 # sqlite/sqlite3.c: The SQLite amalgamation source code (MUST be compiled!)
 #
@@ -11,5 +13,5 @@
 #                   the file is in a subfolder.
 # -lpthread -ldl  : Required system libraries for SQLite on Linux/Mac.
 
-gcc main.c db/db.c db/migrations.c sqlite/sqlite3.c -o program -I./sqlite -lpthread -ldl
+gcc main.c feat/init.c feat/help.c db/db.c db/migrations.c sqlite/sqlite3.c -o program -I./sqlite -lpthread -ldl
 echo "Compilation finished. Run ./program to test."

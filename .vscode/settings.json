@@ -1,9 +1,5 @@
 {
     "files.associations": {
-        "chrono": "c",
-        "text_encoding": "c",
-        "typeinfo": "c",
-        "functional": "c",
-        "db.h": "c"
+        "types.h": "c"
     }
 }

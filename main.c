@@ -1,72 +1,35 @@
 #include <stdio.h>
-#include <errno.h>
 #include <string.h>
-#include <stdlib.h>
 #include "./db/db.h"
+#include "./feat/init.h"
+#include "./feat/help.h"
 
-#ifdef _WIN32
-#include <direct.h>
-#else
-#include <sys/stat.h>
-#include <sys/types.h>
-#endif
+#define DATA_FOLDER "./data"
+#define FILENAME "data.db"
 
 int main(int argc, char *argv[])
 {
-    sqlite3 *db;
-    char *zErrMsg = 0;
-    int err;
-    int result = -1;
-
-    const char *folder = "./data";
-
-#ifdef _WIN32
-    result = _mkdir(folder);
-#else
-    result = mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO);
-#endif
-
-    if (result == -1)
+    if (argc < 2)
     {
-        if (errno == EEXIST)
-        {
-            printf("Folder '%s' already exists.\n", folder);
-        }
-        else
-        {
-            printf("Error creating folder '%s': %s\n", folder, strerror(errno));
-        }
-    }
-    else
-    {
-        printf("Folder '%s' created successfully.\n", folder);
-    }
-
-    err = openOrCreateDB("./data/test_1.db", &db);
-
-    if (err)
-    {
-        fprintf(stderr, "Can't open database: %s\n", sqlite3_errmsg(db));
+        print_help(argv[0]);
         return 0;
     }
-    else
+
+    char *command = argv[1];
+
+    if (strcmp(argv[1], "init") == 0 || strcmp(argv[1], "-i") == 0)
     {
-        fprintf(stderr, "Opened database successfully\n");
+        init(DATA_FOLDER, FILENAME);
+        return 0;
     }
 
-    if (argc > 1)
+    if (strcmp(argv[1], "help") == 0 || strcmp(argv[1], "-h") == 0)
     {
-        if (strcmp(argv[1], "init") == 0)
-        {
-            err = migrate_up(db);
-
-            if(err != SQLITE_OK){
-                fprintf(stderr, "Migrations Error! %s\n", sqlite3_errmsg(db));
-            }
-        }
+        print_help(argv[0]);
+        return 0;
     }
 
-    sqlite3_close(db);
-
-    return 0;
+    fprintf(stderr, "Unknown command: '%s'\n", command);
+    fprintf(stderr, "Type '%s help' to see available commands.\n", argv[0]);
+    return 1;
 }
