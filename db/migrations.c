@@ -27,7 +27,8 @@ static Migration registry[] = {
         user_id INTEGER NOT NULL, \
         name TEXT NOT NULL, \
         balance DECIMAL(15, 2) NOT NULL DEFAULT 0, \
-        allocation_percentage INTEGER, \
+        allocation_percentage INTEGER DEFAULT 0, \
+        is_main BOOLEAN NOT NULL DEFAULT 0, \
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
         FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
         ); \
@@ -95,7 +96,7 @@ static Migration registry[] = {
         category_id INTEGER, \
         debt_id INTEGER, \
         savings_goal_id INTEGER, \
-        type TEXT NOT NULL CHECK(type IN ('income', 'expense')), \
+        type TEXT NOT NULL CHECK(type IN ('income', 'expense', 'send', 'accept')), \
         amount DECIMAL(15, 2) NOT NULL, \
         description TEXT, \
         transaction_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \
@@ -124,13 +125,10 @@ static Migration registry[] = {
         wants_percentage INTEGER NOT NULL DEFAULT 30, \
         savings_percentage INTEGER NOT NULL DEFAULT 20, \
         target_income DECIMAL(15, 2) NOT NULL, \
-        start_date DATE NOT NULL, \
-        end_date DATE NOT NULL, \
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
         FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
         ); \
-        CREATE INDEX idx_budget_rules_user_id ON BudgetRules(user_id); \
-        CREATE UNIQUE INDEX idx_budget_rules_unique_period ON BudgetRules(user_id, start_date, end_date);",
+        CREATE INDEX idx_budget_rules_user_id ON BudgetRules(user_id);",
         "DROP TABLE IF EXISTS BudgetRules;" 
     }
 };

@@ -1,6 +1,10 @@
 {
     "files.associations": {
         "types.h": "c",
-        "errno.h": "c"
+        "errno.h": "c",
+        "db.h": "c",
+        "budget_rule.h": "c",
+        "stdio.h": "c",
+        "user.h": "c"
     }
 }

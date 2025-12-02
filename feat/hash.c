@@ -13,7 +13,7 @@ unsigned long hash(unsigned char *str) {
         hash = ((hash << 5) + hash) + c; 
     }
 
-    fprintf(stderr, "%d", hash);
+    // fprintf(stderr, "%d", hash);
 
     return hash;
 }
