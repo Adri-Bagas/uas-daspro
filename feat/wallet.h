@@ -19,6 +19,7 @@ long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int
 Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId);
 Wallet **get_all_wallets_by_user_id_that_are_main(sqlite3 *db, int userId);
 void show_wallet(Wallet **wallets);
-int delete_wallet(sqlite3 *db, int user_id, int wallet_id, char *wallet_name);
+int delete_wallet(sqlite3 *db, int user_id, Wallet *wallet);
+int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wallet, double amount);
 
 #endif

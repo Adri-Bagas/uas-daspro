@@ -19,12 +19,10 @@ void free_wallet(Wallet *wallet)
     }
 }
 
+// free_wallets remains the same
 void free_wallets(Wallet **wallets)
 {
-    if (wallets == NULL)
-    {
-        return;
-    }
+    if (wallets == NULL) return;
 
     int i = 0;
     while (wallets[i] != NULL)
@@ -32,10 +30,8 @@ void free_wallets(Wallet **wallets)
         free_wallet(wallets[i]);
         i++;
     }
-
     free(wallets);
 }
-
 int create_wallet_first_time(sqlite3 *db, int userId)
 {
     BudgetRule *rule = get_budget_rule_by_user_id(db, userId);
@@ -114,9 +110,14 @@ int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int
     return wallet_id;
 };
 
-int delete_wallet(sqlite3 *db, int user_id, int wallet_id, char *wallet_name){
+int delete_wallet(sqlite3 *db, int user_id, Wallet *wallet){
 
-    printf("Deleting wallet '%s'\n", wallet_name);
+    printf("Deleting wallet '%s'\n", wallet->name);
+
+    if(wallet->is_main){
+        fprintf(stderr, "Cannot delete that is main wallet\n");
+        return -1;
+    }
 
     sqlite3_stmt *stmt;
     const char *sql = "DELETE FROM wallets WHERE id = ? AND user_id = ?";
@@ -128,7 +129,7 @@ int delete_wallet(sqlite3 *db, int user_id, int wallet_id, char *wallet_name){
         return -1;
     }
 
-    sqlite3_bind_int(stmt, 1, wallet_id);
+    sqlite3_bind_int(stmt, 1, wallet->id);
     sqlite3_bind_int(stmt, 2, user_id);
 
     rc = sqlite3_step(stmt);
@@ -140,10 +141,145 @@ int delete_wallet(sqlite3 *db, int user_id, int wallet_id, char *wallet_name){
         return -1;
     }
 
-    printf("Wallet '%s' deleted successfully.\n", wallet_name);
+    printf("Wallet '%s' deleted successfully.\n", wallet->name);
 
     sqlite3_finalize(stmt);
 
+    return 0;
+}
+
+int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wallet, double amount){
+
+    printf("Transferring %.2f from wallet '%s' to wallet '%s'\n", amount, from_wallet->name, to_wallet->name);
+
+    if (from_wallet->balance < amount){
+        printf("Insufficient funds in wallet '%s'\n", from_wallet->name);
+        return -1;
+    }
+
+    int rc = sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Failed to begin transaction: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_stmt *stmt;
+    const char *sql = "UPDATE wallets SET balance = balance + ? WHERE id = ?";
+    const char *sql2 = "UPDATE wallets SET balance = balance - ? WHERE id = ?";
+
+    const char *sql3 = "INSERT INTO Transactions (amount, user_id, wallet_id, type) VALUES (?, ?, ?, 'accept')";
+    const char *sql4 = "INSERT INTO Transactions (amount, user_id, wallet_id, type) VALUES (?, ?, ?, 'send')";
+
+    rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+
+    sqlite3_bind_double(stmt, 1, amount);
+    sqlite3_bind_int(stmt, 2, to_wallet->id);
+
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    rc = sqlite3_prepare_v2(db, sql2, -1, &stmt, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_bind_double(stmt, 1, amount);
+    sqlite3_bind_int(stmt, 2, from_wallet->id);
+
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    rc = sqlite3_prepare_v2(db, sql3, -1, &stmt, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_bind_double(stmt, 1, amount);
+    sqlite3_bind_int(stmt, 2, user_id);
+    sqlite3_bind_int(stmt, 3, to_wallet->id);
+
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    rc = sqlite3_prepare_v2(db, sql4, -1, &stmt, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_bind_double(stmt, 1, amount);
+    sqlite3_bind_int(stmt, 2, user_id);
+    sqlite3_bind_int(stmt, 3, from_wallet->id);
+
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE)
+    {
+        sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
+        fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    sqlite3_finalize(stmt);
+
+    rc = sqlite3_exec(db, "COMMIT;", 0, 0, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Failed to commit transaction: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    printf("Transfered %.2f from %s to %s\n", amount, from_wallet->name, to_wallet->name);
     return 0;
 }
 
@@ -249,7 +385,7 @@ void show_wallet(Wallet **wallets)
 
     while (wallets[count] != NULL)
     {
-        printf("| %-*d | %-*d | %-*s | %-*f | %-*d | %-*s |\n",
+        printf("| %-*d | %-*d | %-*s | %-*.2f | %-*d | %-*s |\n",
                widths[0], wallets[count]->id,
                widths[1], wallets[count]->user_id,
                widths[2], wallets[count]->name,
@@ -267,7 +403,7 @@ void show_wallet(Wallet **wallets)
 Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
 {
     sqlite3_stmt *stmt;
-    const char *sql = "SELECT id, user_id, name, balance, allocation_percentage FROM wallets WHERE user_id = ?";
+    const char *sql = "SELECT id, user_id, name, balance, allocation_percentage, is_main FROM wallets WHERE user_id = ?";
 
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
@@ -328,6 +464,7 @@ Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
 
             wallets[count]->balance = sqlite3_column_double(stmt, 3);
             wallets[count]->allocation = sqlite3_column_int(stmt, 4);
+            wallets[count]->is_main = sqlite3_column_int(stmt, 5);
 
             count++;
             break;
@@ -353,7 +490,7 @@ Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
 Wallet **get_all_wallets_by_user_id_that_are_main(sqlite3 *db, int userId)
 {
     sqlite3_stmt *stmt;
-    const char *sql = "SELECT id, user_id, name, balance, allocation_percentage FROM wallets WHERE user_id = ? AND is_main = 1";
+    const char *sql = "SELECT id, user_id, name, balance, allocation_percentage, is_main FROM wallets WHERE user_id = ? AND is_main = 1";
 
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
@@ -414,6 +551,7 @@ Wallet **get_all_wallets_by_user_id_that_are_main(sqlite3 *db, int userId)
 
             wallets[count]->balance = sqlite3_column_double(stmt, 3);
             wallets[count]->allocation = sqlite3_column_int(stmt, 4);
+            wallets[count]->is_main = sqlite3_column_int(stmt, 5);
 
             count++;
             break;

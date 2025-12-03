@@ -6,6 +6,7 @@
 #include "budget_rule.h"
 #include "income.h"
 #include "spending.h"
+#include "transaction.h"
 
 void menu(sqlite3 *db, User* user);
 

@@ -36,7 +36,7 @@ void free_categories(Category **categories){
 Category **get_all_categories(sqlite3 *db)
 {
     sqlite3_stmt *stmt;
-    const char *sql = "SELECT id, name, type, budget_bucket FROM wallets";
+    const char *sql = "SELECT id, name, type, budget_bucket FROM Categories";
 
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
 
@@ -87,11 +87,10 @@ Category **get_all_categories(sqlite3 *db)
             if (raw_name_text)
             {
                 categories[count]->name = strdup((char *)raw_name_text);
-                categories[count]->name[sizeof(categories[count]->name) - 1] = '\0';
             }
             else
             {
-                categories[count]->name[0] = '\0';
+                categories[count]->name = strdup(""); 
             }
 
             const unsigned char *raw_type_text = sqlite3_column_text(stmt, 2);
@@ -99,11 +98,10 @@ Category **get_all_categories(sqlite3 *db)
             if (raw_type_text)
             {
                 categories[count]->type = strdup((char *)raw_type_text);
-                categories[count]->type[sizeof(categories[count]->type) - 1] = '\0';
             }
             else
             {
-                categories[count]->type[0] = '\0';
+                categories[count]->type = strdup("");
             }
 
             const unsigned char *raw_budget_bucket_text = sqlite3_column_text(stmt, 3);

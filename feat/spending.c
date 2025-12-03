@@ -23,7 +23,7 @@ int insert_spending(sqlite3 *db, double amount, int userId, int wallet_id, char 
 
     printf("Inserting spending: %.2f from wallet: %s\n", amount, wallet_name);
 
-    char *sql = "INSERT INTO Transactions (amount, user_id, wallet_id, type, category_id) VALUES (?, ?, ?, 'spending')";
+    char *sql = "INSERT INTO Transactions (amount, user_id, wallet_id, type, category_id) VALUES (?, ?, ?, 'expense', ?)";
     char *update_sql = "UPDATE Wallets SET balance = balance - ? WHERE id = ?";
 
     sqlite3_stmt *stmt;
@@ -39,6 +39,7 @@ int insert_spending(sqlite3 *db, double amount, int userId, int wallet_id, char 
     sqlite3_bind_double(stmt, 1, amount);
     sqlite3_bind_int(stmt, 2, userId);
     sqlite3_bind_int(stmt, 3, wallet_id);
+    sqlite3_bind_int(stmt, 4, category_id);
 
     rc = sqlite3_step(stmt);
 
@@ -166,6 +167,12 @@ amount_input:
 
             if (wallet_input > 0 && wallet_input <= i)
             {
+                if(wallets[wallet_input - 1]->balance < amount)
+                {
+                    fprintf(stderr, "Wallet balance is not enough\n");
+                    goto wallet_selection_spending;
+                }
+
                 selected_wallet_id = wallets[wallet_input - 1]->id;
 
                 strcpy(selected_wallet_name, wallets[wallet_input - 1]->name);

@@ -275,6 +275,7 @@ password_input:
 
             while (1)
             {
+                base_percentage = 100;
                 printf("Please enter percentage for needs: \n");
                 fgets(input_buffer, 5, stdin);
                 needs = atoi(input_buffer);
