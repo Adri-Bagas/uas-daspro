@@ -12,5 +12,6 @@ int get_yes_or_no_input(char *question, int default_value);
 int get_int_input(char *question);
 double get_double_input(char *question);
 void clear_input_buffer();
+void print_line(int *widths, int columns);
 
 #endif

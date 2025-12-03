@@ -12,7 +12,7 @@ REM sqlite/sqlite3.c    : SQLite implementation
 REM -o program.exe      : Output executable name
 REM -I.\sqlite          : Include path for header files (using backslash for Windows paths, though forward slash often works too)
 
-gcc main.c feat/init.c feat/help.c db/db.c db/migrations.c sqlite/sqlite3.c -o program.exe -I.\sqlite
+gcc main.c feat/*.c db/*.c sqlite/sqlite3.c -o program.exe -I.\sqlite
 
 IF %ERRORLEVEL% EQU 0 (
     echo Compilation successful.

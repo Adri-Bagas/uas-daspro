@@ -20,7 +20,7 @@ void free_user(User *data)
 User* get_user_by_username(sqlite3 *db, const char *username)
 {
     sqlite3_stmt *stmt;
-    const char *sql = "SELECT id, username, password_hashed FROM Users WHERE username = ?";
+    const char *sql = "SELECT id, username, password_hash FROM Users WHERE username = ?";
     User *user = NULL;
 
     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);

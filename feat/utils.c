@@ -109,3 +109,14 @@ void clear_input_buffer(){
     char c;
     while ((c = getchar()) != '\n' && c != EOF) {}
 }
+
+void print_line(int *widths, int columns) {
+    printf("+");
+    for (int i = 0; i < columns; i++) {
+        for (int j = 0; j < widths[i] + 2; j++) {
+            printf("-");
+        }
+        printf("+");
+    }
+    printf("\n");
+}

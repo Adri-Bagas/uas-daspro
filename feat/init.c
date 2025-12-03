@@ -13,9 +13,13 @@
 
 #ifdef _WIN32
 #include <direct.h>
+#include <windows.h>
+#define SLEEP_SECONDS(seconds) Sleep(seconds * 1000)
 #else
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
+#define SLEEP_SECONDS(seconds) sleep(seconds)
 #endif
 
 #define COLOR_RESET "\033[0m"
@@ -29,32 +33,32 @@ void show_onboarding()
     clear_screen();
 
     printf("\n\n");
-    printf(COLOR_GREEN);
-    print_centered("$$$   FINANCE MANAGER CLI   $$$");
-    printf(COLOR_RESET);
-    print_centered("========================================");
+    // printf(COLOR_GREEN);
+    printf("$$$   FINANCE MANAGER CLI   $$$\n");
+    // printf(COLOR_RESET);
+    printf("========================================");
     printf("\n");
 
-    printf("  %sWelcome to your path to Financial Freedom!%s\n\n", COLOR_BOLD, COLOR_RESET);
+    printf("%sWelcome to your path to Financial Freedom!%s\n\n", COLOR_BOLD, COLOR_RESET);
 
-    printf("  This application helps you organize your money efficiently.\n");
-    printf("  Here is what you can do:\n\n");
+    printf("This application helps you organize your money efficiently.\n");
+    printf("Here is what you can do:\n\n");
 
-    printf("  %s1. Smart Wallets:%s\n", COLOR_CYAN, COLOR_RESET);
-    printf("     Manage multiple accounts (Main, Emergency, Savings) in one place.\n\n");
+    printf("%s1. Smart Wallets:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("  Manage multiple accounts (Main, Emergency, Savings) in one place.\n\n");
 
-    printf("  %s2. Track Everything:%s\n", COLOR_CYAN, COLOR_RESET);
-    printf("     Record Income and Expenses with custom categories.\n\n");
+    printf("%s2. Track Everything:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("  Record Income and Expenses with custom categories.\n\n");
 
-    printf("  %s3. Goals & Debts:%s\n", COLOR_CYAN, COLOR_RESET);
-    printf("     Set Savings Goals and track Debt repayments seamlessly.\n\n");
+    printf("%s3. Goals & Debts:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("  Set Savings Goals and track Debt repayments seamlessly.\n\n");
 
-    printf("  %s4. Budgeting:%s\n", COLOR_CYAN, COLOR_RESET);
-    printf("     Apply the 50/30/20 rule to control your spending habits.\n\n");
+    printf("%s4. Budgeting:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("  Apply the 50/30/20 rule to control your spending habits.\n\n");
 
-    printf(COLOR_YELLOW "  ----------------------------------------\n" COLOR_RESET);
-    printf("  Let's get you set up with a user profile.\n");
-    printf(COLOR_YELLOW "  ----------------------------------------\n" COLOR_RESET);
+    printf("----------------------------------------\n");
+    printf("Let's get you set up with a user profile.\n");
+    printf("----------------------------------------\n" COLOR_RESET);
 }
 
 void init(char *folder, char *filename)
@@ -65,28 +69,6 @@ void init(char *folder, char *filename)
 
     char *path;
     char *sql;
-
-#ifdef _WIN32
-    result = _mkdir(folder);
-#else
-    result = mkdir(folder, S_IRWXU | S_IRWXG | S_IRWXO);
-#endif
-
-    if (result == -1)
-    {
-        if (errno == EEXIST)
-        {
-            printf("Folder '%s' already exists.\n", folder);
-        }
-        else
-        {
-            printf("Error creating folder '%s': %s\n", folder, strerror(errno));
-        }
-    }
-    else
-    {
-        printf("Folder '%s' created successfully.\n", folder);
-    }
 
     // tambah 1 byte buat / dan tambah 1 lagi buat \0
     path = (char *)malloc((strlen(folder) + strlen(filename)) + 2);
@@ -117,10 +99,20 @@ void init(char *folder, char *filename)
     if (err != SQLITE_OK)
     {
         fprintf(stderr, "Migrations Error! %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        close_db(db);
         exit(1);
     }
 
+    err = seed_default_categories(db);
+
+    if (err)
+    {
+        fprintf(stderr, "Migrations Error! %s\n", sqlite3_errmsg(db));
+        close_db(db);
+        exit(1);
+    }
+    
+    SLEEP_SECONDS(5);
     // TODO: ASK About Login info
 
     show_onboarding();
@@ -264,7 +256,7 @@ password_input:
         if (err)
         {
             fprintf(stderr, "Failed to create budget rules: %s\n", sqlite3_errmsg(db));
-            sqlite3_close(db);
+            close_db(db);
             exit(1);
         }
 
@@ -353,7 +345,7 @@ password_input:
             if (err)
             {
                 fprintf(stderr, "Failed to create budget rules: %s\n", sqlite3_errmsg(db));
-                sqlite3_close(db);
+                close_db(db);
                 exit(1);
             }
 
@@ -373,7 +365,7 @@ password_input:
         if (wallet_id <= 0)
         {
             fprintf(stderr, "Failed to prepare create Main wallet: %s\n", sqlite3_errmsg(db));
-            sqlite3_close(db);
+            close_db(db);
             exit(1);
         }
 
@@ -388,7 +380,7 @@ password_input:
         if (err != 0)
         {
             fprintf(stderr, "Failed to prepare create wallets: %s\n", sqlite3_errmsg(db));
-            sqlite3_close(db);
+            close_db(db);
             exit(1);
         }
     }
@@ -407,7 +399,7 @@ password_input:
     path = NULL;
     sql = NULL;
 
-    sqlite3_close(db);
+    close_db(db);
 
     exit(0);
 }

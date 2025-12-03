@@ -1,0 +1,87 @@
+{
+  "meta": {
+    "report_type": "monthly",
+    "period_start": "2023-10-01",
+    "period_end": "2023-10-31",
+    "generated_at": "2023-11-01T10:00:00Z"
+  },
+  "summary": {
+    "total_income": 15000000.00,
+    "total_expense": 8500000.00,
+    "total_debt_payments": 2000000.00,  // New: Amount spent on debts this month
+    "total_savings_contributions": 1500000.00, // New: Amount added to goals this month
+    "net_cash_flow": 3000000.00 // Income - (Expense + Debt Pay + Savings Add)
+  },
+  "charts": {
+    "timeline": {
+      "labels": ["01", "02"],
+      "income_data": [5000000, 0],
+      "expense_data": [200000, 50000]
+    },
+    "budget_buckets": {
+      "labels": ["Needs", "Wants", "Savings", "Debt Repayment"],
+      "data": [4000000, 2500000, 2000000, 2000000],
+      "colors": ["#3b82f6", "#eab308", "#22c55e", "#ef4444"]
+    },
+    "debt_vs_savings_trend": {
+       "note": "Great for a double-bar chart to see financial responsibility per day",
+       "labels": ["01", "02", "...", "31"],
+       "debt_payment_data": [0, 500000, 0, 0],
+       "savings_contribution_data": [100000, 0, 0, 500000]
+    }
+  },
+  "debts_status": [
+    {
+      "id": 1,
+      "name": "Car Loan",
+      "total_amount": 150000000.00,
+      "remaining_amount": 120000000.00,
+      "paid_this_month": 1500000.00,
+      "progress_percentage": 20.0,
+      "is_installment": true,
+      "next_due_date": "2023-11-05"
+    },
+    {
+      "id": 2,
+      "name": "Credit Card",
+      "total_amount": 5000000.00,
+      "remaining_amount": 0.00,
+      "paid_this_month": 500000.00,
+      "progress_percentage": 100.0,
+      "status": "PAID_OFF"
+    }
+  ],
+  "savings_goals_status": [
+    {
+      "id": 5,
+      "name": "New Laptop",
+      "target_amount": 20000000.00,
+      "current_amount": 5000000.00,
+      "saved_this_month": 1000000.00,
+      "progress_percentage": 25.0,
+      "target_date": "2023-12-31"
+    }
+  ],
+  "transactions": [
+    {
+      "id": 101,
+      "date": "2023-10-01 08:30:00",
+      "type": "expense",
+      "category": "Food",
+      "wallet": "Main Wallet",
+      "description": "Breakfast",
+      "amount": 25000.00,
+      "bucket": "Needs"
+    },
+    {
+      "id": 102,
+      "date": "2023-10-01 18:00:00",
+      "type": "income",
+      "category": "Salary",
+      "wallet": "Bank BCA",
+      "description": "October Salary",
+      "amount": 10000000.00,
+      "bucket": null
+    }
+  ]
+}

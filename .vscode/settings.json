@@ -5,6 +5,7 @@
         "db.h": "c",
         "budget_rule.h": "c",
         "stdio.h": "c",
-        "user.h": "c"
+        "user.h": "c",
+        "menu.h": "c"
     }
 }

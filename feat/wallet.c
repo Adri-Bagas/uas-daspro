@@ -4,20 +4,26 @@
 #include <string.h>
 #include "wallet.h"
 #include "budget_rule.h"
+#include "utils.h"
 
-void free_wallet(Wallet *wallet){
-    if (wallet != NULL) {
+void free_wallet(Wallet *wallet)
+{
+    if (wallet != NULL)
+    {
         free(wallet);
     }
 }
 
-void free_wallets(Wallet **wallets){
-    if (wallets == NULL) {
+void free_wallets(Wallet **wallets)
+{
+    if (wallets == NULL)
+    {
         return;
     }
 
     int i = 0;
-    while (wallets[i] != NULL) {
+    while (wallets[i] != NULL)
+    {
         free_wallet(wallets[i]);
         i++;
     }
@@ -38,28 +44,28 @@ int create_wallet_first_time(sqlite3 *db, int userId)
 
     err = create_wallet(db, "Main", userId, rule->needs_percentage, 1);
 
-    if (err != 0)
+    if (err == -1)
     {
         fprintf(stderr, "Failed to prepare create Main wallet: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        close_db(db);
         exit(1);
     }
 
     err = create_wallet(db, "Wants", userId, rule->wants_percentage, 1);
 
-    if (err != 0)
+    if (err == -1)
     {
         fprintf(stderr, "Failed to prepare create Wants wallet: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        close_db(db);
         exit(1);
     }
 
     err = create_wallet(db, "Savings", userId, rule->savings_percentage, 1);
 
-    if (err != 0)
+    if (err == -1)
     {
         fprintf(stderr, "Failed to prepare create Savings wallet: %s\n", sqlite3_errmsg(db));
-        sqlite3_close(db);
+        close_db(db);
         exit(1);
     }
 
@@ -77,7 +83,7 @@ int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int
     if (rc != SQLITE_OK)
     {
         fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-        return 1;
+        return -1;
     }
 
     sqlite3_bind_text(stmt, 1, walletName, -1, SQLITE_STATIC);
@@ -91,14 +97,16 @@ int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int
     {
         fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
         sqlite3_finalize(stmt);
-        return 1;
+        return -1;
     }
+
+    int wallet_id = sqlite3_last_insert_rowid(db);
 
     printf("Wallet '%s' created successfully.\n", walletName);
 
     sqlite3_finalize(stmt);
 
-    return 0;
+    return wallet_id;
 };
 
 long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int allocation, int is_main)
@@ -173,6 +181,51 @@ long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int
 //         return NULL;
 //     }
 // }
+
+void show_wallet(Wallet **wallets)
+{
+
+    if (wallets == NULL)
+    {
+        fprintf(stderr, "No wallets found.\n");
+        return;
+    }
+
+    int count = 0;
+
+    int widths[] = {4, 7, 20, 15, 8, 5};
+    int num_cols = 6;
+
+    printf("\n--- Wallets Table ---\n");
+    print_line(widths, num_cols);
+
+    printf("| %-*s | %-*s | %-*s | %-*s | %-*s | %-*s |\n",
+           widths[0], "ID",
+           widths[1], "User ID",
+           widths[2], "Name",
+           widths[3], "Balance",
+           widths[4], "Alloc %",
+           widths[5], "Main");
+
+    print_line(widths, num_cols);
+
+    while (wallets[count] != NULL)
+    {
+        printf("| %-*d | %-*d | %-*s | %-*f | %-*d | %-*s |\n",
+               widths[0], wallets[count]->id,
+               widths[1], wallets[count]->user_id,
+               widths[2], wallets[count]->name,
+               widths[3], wallets[count]->balance,
+               widths[4], wallets[count]->allocation,
+               widths[5], wallets[count]->is_main ? "Yes" : "No");
+
+        count++;
+    }
+
+    print_line(widths, num_cols);
+
+    getchar();
+}
 
 Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
 {
@@ -250,10 +303,11 @@ Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
 
     sqlite3_finalize(stmt);
 
-    Wallet **temp = realloc(wallets, sizeof(Wallet*) * (count + 1));
-    if (temp) {
+    Wallet **temp = realloc(wallets, sizeof(Wallet *) * (count + 1));
+    if (temp)
+    {
         wallets = temp;
-        wallets[count] = NULL; 
+        wallets[count] = NULL;
     }
 
     return wallets;
@@ -335,10 +389,11 @@ Wallet **get_all_wallets_by_user_id_that_are_main(sqlite3 *db, int userId)
 
     sqlite3_finalize(stmt);
 
-    Wallet **temp = realloc(wallets, sizeof(Wallet*) * (count + 1));
-    if (temp) {
+    Wallet **temp = realloc(wallets, sizeof(Wallet *) * (count + 1));
+    if (temp)
+    {
         wallets = temp;
-        wallets[count] = NULL; 
+        wallets[count] = NULL;
     }
 
     return wallets;

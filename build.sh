@@ -13,5 +13,5 @@
 #                   the file is in a subfolder.
 # -lpthread -ldl  : Required system libraries for SQLite on Linux/Mac.
 
-gcc main.c feat/utils.c feat/user.c feat/init.c feat/hash.c feat/help.c feat/budget_rule.c feat/wallet.c feat/income.c db/db.c db/migrations.c sqlite/sqlite3.c -o program -I./sqlite -lpthread -ldl
+gcc db/*.c feat/*.c sqlite/sqlite3.c main.c -o program -I./sqlite -lpthread -ldl
 echo "Compilation finished. Run ./program to test."
