@@ -6,6 +6,11 @@
 #include "budget_rule.h"
 #include "utils.h"
 
+/**
+ * Frees a single wallet structure.
+ *
+ * @param wallet The wallet to free.
+ */
 void free_wallet(Wallet *wallet)
 {
     if (wallet != NULL)
@@ -108,6 +113,39 @@ int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int
 
     return wallet_id;
 };
+
+int delete_wallet(sqlite3 *db, int user_id, int wallet_id, char *wallet_name){
+
+    printf("Deleting wallet '%s'\n", wallet_name);
+
+    sqlite3_stmt *stmt;
+    const char *sql = "DELETE FROM wallets WHERE id = ? AND user_id = ?";
+    int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
+
+    if (rc != SQLITE_OK)
+    {
+        fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
+        return -1;
+    }
+
+    sqlite3_bind_int(stmt, 1, wallet_id);
+    sqlite3_bind_int(stmt, 2, user_id);
+
+    rc = sqlite3_step(stmt);
+
+    if (rc != SQLITE_DONE)
+    {
+        fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
+        sqlite3_finalize(stmt);
+        return -1;
+    }
+
+    printf("Wallet '%s' deleted successfully.\n", wallet_name);
+
+    sqlite3_finalize(stmt);
+
+    return 0;
+}
 
 long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int allocation, int is_main)
 {
@@ -224,7 +262,6 @@ void show_wallet(Wallet **wallets)
 
     print_line(widths, num_cols);
 
-    getchar();
 }
 
 Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)

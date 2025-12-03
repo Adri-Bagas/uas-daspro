@@ -24,8 +24,6 @@
 
 #define COLOR_RESET "\033[0m"
 #define COLOR_GREEN "\033[1;32m"
-#define COLOR_CYAN "\033[1;36m"
-#define COLOR_YELLOW "\033[1;33m"
 #define COLOR_BOLD "\033[1m"
 
 void show_onboarding()
@@ -44,16 +42,16 @@ void show_onboarding()
     printf("This application helps you organize your money efficiently.\n");
     printf("Here is what you can do:\n\n");
 
-    printf("%s1. Smart Wallets:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("%s1. Smart Wallets:%s\n", COLOR_GREEN, COLOR_RESET);
     printf("  Manage multiple accounts (Main, Emergency, Savings) in one place.\n\n");
 
-    printf("%s2. Track Everything:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("%s2. Track Everything:%s\n", COLOR_GREEN, COLOR_RESET);
     printf("  Record Income and Expenses with custom categories.\n\n");
 
-    printf("%s3. Goals & Debts:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("%s3. Goals & Debts:%s\n", COLOR_GREEN, COLOR_RESET);
     printf("  Set Savings Goals and track Debt repayments seamlessly.\n\n");
 
-    printf("%s4. Budgeting:%s\n", COLOR_CYAN, COLOR_RESET);
+    printf("%s4. Budgeting:%s\n", COLOR_GREEN, COLOR_RESET);
     printf("  Apply the 50/30/20 rule to control your spending habits.\n\n");
 
     printf("----------------------------------------\n");
@@ -140,8 +138,8 @@ username_input:
 
     if (!valid)
     {
-        fprintf(stderr, "Username contains illegal character! please try again!");
-        memset(username, 0, sizeof(username));
+        fprintf(stderr, "Username contains illegal character! please try again!\n");
+        strcpy(username, "");
         goto username_input;
     }
 
@@ -173,7 +171,7 @@ username_input:
     if (count != 0)
     {
         fprintf(stderr, "Username already exist! please try again!");
-        memset(username, 0, sizeof(username));
+        strcpy(username, "");
         goto username_input;
     }
 
@@ -194,14 +192,6 @@ password_input:
 
     get_password(confirmation, 64);
 
-    if (strcmp(password, confirmation) != 0)
-    {
-        fprintf(stderr, "Password not matching! please try again!");
-        memset(password, 0, sizeof(password));
-        memset(confirmation, 0, sizeof(confirmation));
-        goto password_input;
-    }
-
     valid = 1;
 
     for (int i = 0; password[i] != '\0'; i++)
@@ -215,9 +205,17 @@ password_input:
 
     if (!valid)
     {
-        fprintf(stderr, "Password contains illegal character! please try again!");
-        memset(password, 0, sizeof(password));
-        memset(confirmation, 0, sizeof(confirmation));
+        fprintf(stderr, "Password contains illegal character! please try again!\n");
+        strcpy(password, "");
+        strcpy(confirmation, "");
+        goto password_input;
+    }
+
+    if (strcmp(password, confirmation) != 0)
+    {
+        fprintf(stderr, "Password not matching! please try again!\n");
+        strcpy(password, "");
+        strcpy(confirmation, "");
         goto password_input;
     }
 
