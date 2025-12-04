@@ -1,5 +1,14 @@
 #include "menu.h"
 #include "auth.h"
+#include "utils.h"
+#include "user.h"
+#include "wallet.h"
+#include "budget_rule.h"
+#include "income.h"
+#include "spending.h"
+#include "transaction.h"
+#include "category.h"
+#include "calculator.h"
 
 void handle_wallet_menu(sqlite3 *db, int user_id)
 {
@@ -406,6 +415,10 @@ exit_history_menu:
     }
 }
 
+void handle_calculator_menu()
+{
+    show_calculator_menu();
+}
 void menu(sqlite3 *db, User *user)
 {
     clear_screen();
@@ -421,7 +434,7 @@ void menu(sqlite3 *db, User *user)
         printf("2. Register Income\n");
         printf("3. Register Spending\n");
         printf("4. History\n");
-        printf("5. Calculate Debts\n");
+        printf("5. Calculator\n");
         printf("6. Generate Report\n");
         printf("7. Help\n");
         printf("8. Exit\n");
@@ -454,9 +467,11 @@ void menu(sqlite3 *db, User *user)
         }
         else if (strcmp(choice, "5") == 0)
         {
+            handle_calculator_menu();
         }
         else if (strcmp(choice, "6") == 0)
         {
+            
         }
         else if (strcmp(choice, "7") == 0)
         {

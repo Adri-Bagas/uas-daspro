@@ -64,7 +64,6 @@ Category **get_all_categories(sqlite3 *db)
             if (temp == NULL)
             {
                 fprintf(stderr, "Memory allocation failed for array\n");
-                free_categories(temp);
                 free_categories(categories);
                 exit(1);
             }
@@ -109,11 +108,10 @@ Category **get_all_categories(sqlite3 *db)
             if (raw_budget_bucket_text)
             {
                 categories[count]->budget_bucket = strdup((char *)raw_budget_bucket_text);
-                categories[count]->budget_bucket[sizeof(categories[count]->budget_bucket) - 1] = '\0';
             }
             else
             {
-                categories[count]->budget_bucket[0] = '\0';
+                categories[count]->budget_bucket = strdup("");
             }
 
             count++;

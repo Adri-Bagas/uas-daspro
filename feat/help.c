@@ -2,7 +2,7 @@
 #include <string.h>
 #include "utils.h"
 
-#define PROGRAM_NAME "program"
+#define PROGRAM_NAME "fmcon"
 #define VERSION "0.0.1"
 
 // ANSI Color Codes

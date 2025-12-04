@@ -12,13 +12,12 @@
     #define MKDIR(d) mkdir(d, 0777)
 #endif
 
-// --- CONFIGURATION ---
-// Store files inside the 'data' folder
-#define ENC_FILENAME "data/data.enc"
-#define CIPHER_KEY "SecretKey2025" 
-#define BUFFER_SIZE 4096
 
-// --- HELPER FUNCTIONS ---
+// Config buat enkripsi
+#define ENC_FILENAME "data/data.enc"
+#define CIPHER_KEY "]a~HGtsy$9xXe,neihado8w071023h hqw9*)&# !)HEA)HShdK%^BAI*WV*&^#!G X(WQU HHOQWH)" 
+#define BUFFER_SIZE 2048
+
 
 /**
  * Ensures the 'data' directory exists.

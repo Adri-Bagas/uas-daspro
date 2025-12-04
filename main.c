@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <locale.h>
 #include "./db/db.h"
 #include "./feat/init.h"
 #include "./feat/help.h"
