@@ -4,5 +4,6 @@
 #include "user.h"
 
 User* login(sqlite3 *db);
+void logout();
 
 #endif

@@ -16,7 +16,7 @@ gcc main.c feat/*.c db/*.c sqlite/sqlite3.c -o fmcon.exe -I.\sqlite
 
 IF %ERRORLEVEL% EQU 0 (
     echo Compilation successful.
-    echo Run "program.exe up" to apply migrations.
+    echo Run "fmcon.exe up" to apply migrations.
 ) ELSE (
     echo Compilation failed.
 )

@@ -1,6 +1,8 @@
 # --- Compiled Executables ---
 program
 program.exe
+fmcon
+fmcon.exe
 *.out
 *.app
 

@@ -13,5 +13,8 @@ int get_int_input(char *question);
 double get_double_input(char *question);
 void clear_input_buffer();
 void print_line(int *widths, int columns);
+int fileExists(const char *filename);
+void ensure_data_dir();
+char *xor_cipher_string(char *string);
 
 #endif

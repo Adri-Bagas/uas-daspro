@@ -19,10 +19,7 @@
 #define BUFFER_SIZE 2048
 
 
-/**
- * Ensures the 'data' directory exists.
- */
-void ensure_data_dir() {
+void ensure_db_dir() {
     // Try to create the directory. 
     // If it exists, this will fail/return -1, which we ignore safely.
     MKDIR("data");
@@ -83,7 +80,7 @@ int file_exists(const char *filename) {
 
 int openOrCreateDB(const char* db_name, sqlite3** db) {
     // 0. Ensure data directory exists
-    ensure_data_dir();
+    ensure_db_dir();
 
     // 1. Security & Decryption Check
     if (file_exists(db_name)) {

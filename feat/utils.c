@@ -1,10 +1,18 @@
 #include "utils.h"
 #ifdef _WIN32
     #include <conio.h>
+    #include <direct.h>
+    #define MKDIR(d) _mkdir(d)
 #else
     #include <termios.h>
     #include <unistd.h>
+    #include <sys/stat.h>
+    #include <sys/types.h>
+    #define MKDIR(d) mkdir(d, 0777)
 #endif
+
+
+#define CIPHER_KEY "]a~HGtsy$9xXe,neihado8w071023h hqw9*)&# !)HEA)HShdK%^BAI*WV*&^#!G X(WQU HHOQWH)" 
 
 void clear_screen() {
     // A simple way to clear screen on both Windows and Linux/Mac
@@ -119,4 +127,30 @@ void print_line(int *widths, int columns) {
         printf("+");
     }
     printf("\n");
+}
+
+int fileExists(const char *filename) {
+    FILE *file = fopen(filename, "r"); // Attempt to open for reading
+    if (file != NULL) {
+        fclose(file); // Close the file if successfully opened
+        return 1; // File exists
+    }
+    return 0; // File does not exist or cannot be opened
+}
+
+void ensure_data_dir() {
+    // Try to create the directory. 
+    // If it exists, this will fail/return -1, which we ignore safely.
+    MKDIR("data");
+}
+
+char *xor_cipher_string(char *string){
+    char *key = CIPHER_KEY;
+    int keylen = strlen(key);
+
+    for(int i = 0; i < strlen(string); i++){
+        string[i] ^= key[i % keylen];
+    }
+
+    return string;
 }

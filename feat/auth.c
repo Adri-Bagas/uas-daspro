@@ -5,12 +5,42 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include <stdio.h>
+#include "utils.h"
 
 // Return user
 User *login(sqlite3 *db) {
   char username[64];
   char password[64];
   int valid = 1;
+
+  int err = 0;
+
+  ensure_data_dir(); 
+
+  if(fileExists("data/session.txt")){
+    FILE *f = fopen("data/session.txt", "r");
+
+    char buffer[128];
+
+    fgets(buffer, 128, f);
+
+    buffer[strcspn(buffer, "\n")] = 0;
+
+    char *username = xor_cipher_string(buffer);
+
+    User *user = get_user_by_username(db, username);
+
+    if (user == NULL)
+    {
+      printf("User Info Not Found! %s\n", username);
+    }
+
+    if(user != NULL){
+      printf("You are already logged in as %s\n", user->username);
+      fclose(f);
+      return user;
+    }
+  }
 
 login_username_input:
   printf("Please enter your username (maks. 64, only alphanumeric, no spaces): "
@@ -65,9 +95,25 @@ login_password_input:
   snprintf(hashed_password, sizeof(hashed_password), "%ld", long_hashed);
 
   if (strcmp(hashed_password, user->password) == 0) {
+    int yn_input = get_yes_or_no_input("Save login session?", 0);
+
+    if(yn_input){
+      FILE *f = fopen("data/session.txt", "w");
+
+      fprintf(f, "%s", xor_cipher_string(username));
+
+      fclose(f);
+    }
+
     return user;
   }
 
   free_user(user);
   exit(1);
+}
+
+void logout(){
+  if(fileExists("data/session.txt")){
+    remove("data/session.txt");
+  }
 }

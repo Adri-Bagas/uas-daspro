@@ -484,7 +484,19 @@ void menu(sqlite3 *db, User *user)
         }
         else if (strcmp(choice, "8") == 0)
         {
-            break;
+            int yn_input = get_yes_or_no_input("Are you sure you want to exit?", 0);
+
+            if (yn_input)
+            {
+                yn_input = get_yes_or_no_input("Delete login credentials/Log out?", 0);
+                if (yn_input)
+                {
+                    logout();
+                }
+                printf("Goodbye!\n");
+                break;
+            }
+            
         }
         else
         {
