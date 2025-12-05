@@ -38,12 +38,15 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
             show_wallet(wallets);
             double total_saves = 0;
 
-            for (size_t i = 0; i < (sizeof(wallets) / sizeof(wallets[0])); i++)
+            int count = 0;
+            while (1)
             {
-                total_saves += wallets[i]->balance; 
+                if (wallets[count] == NULL) break;
+                total_saves += wallets[count]->balance;
+                count++;
             }
 
-            printf("Total Savings: %d\n", total_saves);
+            printf("Total Savings: %.2f\n", total_saves);
         }
         else
         {
@@ -55,9 +58,10 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
         printf("1. Add Wallet\n");
         printf("2. Delete Wallet\n");
         printf("3. Transfer Funds\n");
-        printf("4. Return\n");
+        printf("4. Search Wallets by name (Case Sensitive)\n");
+        printf("5. Return\n");
         printf("----------------\n");
-        printf("Select option (1-4): ");
+        printf("Select option (1-5): ");
 
         if (fgets(choice, sizeof(choice), stdin) == NULL)
             break;
@@ -257,8 +261,47 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
             }
         }
 
-        // --- OPTION 4: RETURN ---
         else if (strcmp(choice, "4") == 0)
+        {
+            printf("\n--- Search Wallet ---\n");
+            printf("Enter wallet name keyword: ");
+
+            char keyword[64];
+            fgets(keyword, 64, stdin);
+            keyword[strcspn(keyword, "\n")] = 0;
+
+            printf("\n>> Search Results for '%s':\n", keyword);
+            printf("--------------------------------\n");
+
+            int found = 0;
+            int i = 0;
+
+            // ALGORITMA LINEAR SEARCH
+            if (wallets != NULL)
+            {
+                while (wallets[i] != NULL)
+                {
+                    if (strstr(wallets[i]->name, keyword) != NULL)
+                    {
+                        printf("- Found: %s (ID: %d) | Balance: %.2f\n",
+                               wallets[i]->name, wallets[i]->id, wallets[i]->balance);
+                        found = 1;
+                    }
+                    i++;
+                }
+            }
+
+            if (!found)
+            {
+                printf("No wallets found with that name.\n");
+            }
+            printf("--------------------------------\n");
+            printf("Press enter to continue...");
+            getchar();
+        }
+
+        // --- OPTION 4: RETURN ---
+        else if (strcmp(choice, "5") == 0)
         {
             // This is the ONLY time we break the loop
             break;
@@ -297,11 +340,13 @@ void handle_history_menu(sqlite3 *db, int user_id)
     while (1)
     {
         clear_screen();
-        transactions = get_all_transactions_by_user_id(db, user_id);
+        if (transactions == NULL)
+            transactions = get_all_transactions_by_user_id(db, user_id);
 
         if (transactions == NULL)
         {
             printf("Failed to fetch transactions\n");
+            getchar();
             break;
         }
 
@@ -309,8 +354,9 @@ void handle_history_menu(sqlite3 *db, int user_id)
 
         printf("1. Filter by date range\n");
         printf("2. Filter by month and year\n");
-        printf("3. Back\n");
-        printf("Select option (1-3): ");
+        printf("3. Sort by Amount (Highest First)\n");
+        printf("4. Back\n");
+        printf("Select option (1-4): ");
 
         if (fgets(choice, sizeof(choice), stdin) == NULL)
             continue;
@@ -410,6 +456,33 @@ void handle_history_menu(sqlite3 *db, int user_id)
         }
         else if (strcmp(choice, "3") == 0)
         {
+            // 1. Hitung jumlah data (karena array diakhiri NULL)
+            int count = 0;
+            while (transactions[count] != NULL)
+            {
+                count++;
+            }
+
+            // 2. Algoritma Bubble Sort (Descending / Besar ke Kecil)
+            for (int i = 0; i < count - 1; i++)
+            {
+                for (int j = 0; j < count - i - 1; j++)
+                {
+                    // Bandingkan amount
+                    if (transactions[j]->amount < transactions[j + 1]->amount)
+                    {
+                        // Swap (Tukar posisi pointer)
+                        Transaction *temp = transactions[j];
+                        transactions[j] = transactions[j + 1];
+                        transactions[j + 1] = temp;
+                    }
+                }
+            }
+            printf(">> Data sorted by Amount (High to Low).\n");
+            continue;
+        }
+        else if (strcmp(choice, "4") == 0)
+        {
             break;
         }
         else
@@ -453,7 +526,8 @@ void handle_report_menu(sqlite3 *db, User *user)
 
         clear_input_buffer();
         int m = atoi(month);
-        if (m >= 1 && m <= 12) break;
+        if (m >= 1 && m <= 12)
+            break;
         printf("Invalid month. Please enter 1-12.\n");
     }
 
@@ -467,17 +541,20 @@ void handle_report_menu(sqlite3 *db, User *user)
 
         clear_input_buffer();
         int y = atoi(year);
-        if (y >= 1900 && y <= 3000) break;
+        if (y >= 1900 && y <= 3000)
+            break;
         printf("Invalid year.\n");
     }
 
     generate_report(db, user, atoi(month), atoi(year));
 }
 
-void handle_help_menu() {
+void handle_help_menu()
+{
     char choice[5];
 
-    while (1) {
+    while (1)
+    {
         clear_screen();
         printf("========================================\n");
         printf("          HELP & DOCUMENTATION          \n");
@@ -490,29 +567,32 @@ void handle_help_menu() {
         printf("----------------------------------------\n");
         printf("Select a topic (1-5): ");
 
-        if (fgets(choice, sizeof(choice), stdin) == NULL) break;
+        if (fgets(choice, sizeof(choice), stdin) == NULL)
+            break;
         choice[strcspn(choice, "\n")] = 0;
 
         // --- TOPIC 1: WALLETS ---
-        if (strcmp(choice, "1") == 0) {
+        if (strcmp(choice, "1") == 0)
+        {
             clear_screen();
             printf("[ WALLETS & TRANSFERS ]\n\n");
             printf("1. MANAGING WALLETS:\n");
             printf("   - Before recording transactions, you must create a Wallet.\n");
             printf("   - Wallets represent where your money is (e.g., 'Cash', 'Bank BCA', 'E-Wallet').\n");
             printf("   - You can delete wallets, but be careful as this might affect history. main wallet cannot be deleted\n\n");
-            
+
             printf("2. TRANSFER FUNDS:\n");
             printf("   - Use this to move money between two existing wallets.\n");
             printf("   - Example: Moving money from 'Bank' to 'Cash' (ATM Withdrawal).\n");
             printf("   - You must have at least 2 wallets created to use this feature.\n");
-            
+
             printf("Pressed enter to continue...\n");
             getchar();
         }
 
         // --- TOPIC 2: INCOME & SPENDING ---
-        else if (strcmp(choice, "2") == 0) {
+        else if (strcmp(choice, "2") == 0)
+        {
             clear_screen();
             printf("[ INCOME & SPENDING ]\n\n");
             printf("1. REGISTER INCOME:\n");
@@ -531,7 +611,8 @@ void handle_help_menu() {
         }
 
         // --- TOPIC 3: HISTORY ---
-        else if (strcmp(choice, "3") == 0) {
+        else if (strcmp(choice, "3") == 0)
+        {
             clear_screen();
             printf("[ TRANSACTION HISTORY ]\n\n");
             printf("This menu allows you to view your past financial activities.\n\n");
@@ -539,7 +620,7 @@ void handle_help_menu() {
             printf("1. By Date Range:\n");
             printf("   - View transactions between two specific dates.\n");
             printf("   - Format must be YYYY-MM-DD (e.g., 2025-01-01).\n\n");
-            
+
             printf("2. By Month and Year:\n");
             printf("   - View all transactions for a specific month.\n");
             printf("   - Useful for checking your monthly activity at a glance.\n");
@@ -549,7 +630,8 @@ void handle_help_menu() {
         }
 
         // --- TOPIC 4: REPORTS & CALCULATOR ---
-        else if (strcmp(choice, "4") == 0) {
+        else if (strcmp(choice, "4") == 0)
+        {
             clear_screen();
             printf("[ REPORTS & TOOLS ]\n\n");
             printf("1. CALCULATOR:\n");
@@ -565,11 +647,13 @@ void handle_help_menu() {
             getchar();
         }
 
-        else if (strcmp(choice, "5") == 0) {
-            break; 
+        else if (strcmp(choice, "5") == 0)
+        {
+            break;
         }
 
-        else {
+        else
+        {
             printf("Invalid selection. Please try again.\n");
             SLEEP_SECONDS(2);
         }

@@ -32,8 +32,11 @@ void free_wallets(Wallet **wallets)
     }
     free(wallets);
 }
+
+// Membuat wallet pertama kali ketika otomatis
 int create_wallet_first_time(sqlite3 *db, int userId)
 {
+    // cari budget rule
     BudgetRule *rule = get_budget_rule_by_user_id(db, userId);
     if (rule == NULL)
     {
@@ -43,6 +46,7 @@ int create_wallet_first_time(sqlite3 *db, int userId)
 
     int err;
 
+    // buat wallet main biasanya untuk needs
     err = create_wallet(db, "Main", userId, rule->needs_percentage, 1);
 
     if (err == -1)
@@ -52,6 +56,7 @@ int create_wallet_first_time(sqlite3 *db, int userId)
         exit(1);
     }
 
+    // buat wallet wants
     err = create_wallet(db, "Wants", userId, rule->wants_percentage, 1);
 
     if (err == -1)
@@ -61,6 +66,7 @@ int create_wallet_first_time(sqlite3 *db, int userId)
         exit(1);
     }
 
+    // buat wallet savings
     err = create_wallet(db, "Savings", userId, rule->savings_percentage, 1);
 
     if (err == -1)
@@ -73,9 +79,11 @@ int create_wallet_first_time(sqlite3 *db, int userId)
     return 0;
 }
 
+// buat wallet
 int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int is_main)
 {
 
+    // prepare statement
     sqlite3_stmt *stmt;
     const char *sql = "INSERT INTO wallets (name, user_id, allocation_percentage, is_main) VALUES (?, ?, ?, ?)";
 
@@ -87,13 +95,16 @@ int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int
         return -1;
     }
 
+    // bind parameter
     sqlite3_bind_text(stmt, 1, walletName, -1, SQLITE_STATIC);
     sqlite3_bind_int(stmt, 2, userId);
     sqlite3_bind_int(stmt, 3, allocation);
     sqlite3_bind_int(stmt, 4, is_main);
 
+    // run
     rc = sqlite3_step(stmt);
 
+    // cek error
     if (rc != SQLITE_DONE)
     {
         fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
@@ -101,6 +112,7 @@ int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int
         return -1;
     }
 
+    // dapat last row
     int wallet_id = sqlite3_last_insert_rowid(db);
 
     printf("Wallet '%s' created successfully.\n", walletName);
