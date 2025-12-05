@@ -27,7 +27,8 @@ static Migration registry[] = {
         user_id INTEGER NOT NULL, \
         name TEXT NOT NULL, \
         balance DECIMAL(15, 2) NOT NULL DEFAULT 0, \
-        allocation_percentage INTEGER, \
+        allocation_percentage INTEGER DEFAULT 0, \
+        is_main BOOLEAN NOT NULL DEFAULT 0, \
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
         FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
         ); \
@@ -39,84 +40,39 @@ static Migration registry[] = {
         3,
         "CREATE TABLE Categories ( \
         id INTEGER PRIMARY KEY AUTOINCREMENT, \
-        user_id INTEGER NOT NULL, \
         name TEXT NOT NULL, \
         type TEXT NOT NULL CHECK(type IN ('income', 'expense')), \
-        budget_bucket TEXT CHECK(budget_bucket IN ('Needs', 'Wants', 'Savings')), \
-        FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
+        budget_bucket TEXT CHECK(budget_bucket IN ('Needs', 'Wants', 'Savings')) \
         ); \
-        CREATE UNIQUE INDEX idx_categories_unique_user ON Categories(user_id, name, type);",
+        CREATE UNIQUE INDEX idx_categories_unique_user ON Categories(name, type);",
         "DROP TABLE IF EXISTS Categories;" 
     },
 
     {
         4,
-        "CREATE TABLE Debts ( \
-        id INTEGER PRIMARY KEY AUTOINCREMENT, \
-        user_id INTEGER NOT NULL, \
-        name TEXT NOT NULL, \
-        total_amount DECIMAL(15, 2) NOT NULL, \
-        amount_paid DECIMAL(15, 2) NOT NULL DEFAULT 0, \
-        is_installment BOOLEAN NOT NULL DEFAULT 0, \
-        monthly_payment DECIMAL(15, 2), \
-        payment_due_day INTEGER, \
-        due_date DATE, \
-        is_paid BOOLEAN NOT NULL DEFAULT 0, \
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
-        FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
-        ); \
-        CREATE INDEX idx_debts_user_id ON Debts(user_id);",
-        "DROP TABLE IF EXISTS Debts;" 
-    },
-
-    {
-        5,
-        "CREATE TABLE SavingsGoals ( \
-        id INTEGER PRIMARY KEY AUTOINCREMENT, \
-        user_id INTEGER NOT NULL, \
-        name TEXT NOT NULL, \
-        target_amount DECIMAL(15, 2) NOT NULL, \
-        amount_saved DECIMAL(15, 2) NOT NULL DEFAULT 0, \
-        target_date DATE, \
-        is_achieved BOOLEAN NOT NULL DEFAULT 0, \
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
-        FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
-        ); \
-        CREATE INDEX idx_savings_goals_user_id ON SavingsGoals(user_id);",
-        "DROP TABLE IF EXISTS SavingsGoals;" 
-    },
-
-    {
-        6,
         "CREATE TABLE Transactions ( \
         id INTEGER PRIMARY KEY AUTOINCREMENT, \
         user_id INTEGER NOT NULL, \
         wallet_id INTEGER NOT NULL, \
         category_id INTEGER, \
-        debt_id INTEGER, \
-        savings_goal_id INTEGER, \
-        type TEXT NOT NULL CHECK(type IN ('income', 'expense')), \
+        type TEXT NOT NULL CHECK(type IN ('income', 'expense', 'send', 'accept')), \
         amount DECIMAL(15, 2) NOT NULL, \
         description TEXT, \
         transaction_date DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP, \
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
         FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE, \
         FOREIGN KEY (wallet_id) REFERENCES Wallets(id) ON DELETE RESTRICT, \
-        FOREIGN KEY (category_id) REFERENCES Categories(id) ON DELETE SET NULL, \
-        FOREIGN KEY (debt_id) REFERENCES Debts(id) ON DELETE SET NULL, \
-        FOREIGN KEY (savings_goal_id) REFERENCES SavingsGoals(id) ON DELETE SET NULL \
+        FOREIGN KEY (category_id) REFERENCES Categories(id) ON DELETE SET NULL \
         ); \
         CREATE INDEX idx_transactions_user_id ON Transactions(user_id); \
         CREATE INDEX idx_transactions_wallet_id ON Transactions(wallet_id); \
         CREATE INDEX idx_transactions_category_id ON Transactions(category_id); \
-        CREATE INDEX idx_transactions_debt_id ON Transactions(debt_id); \
-        CREATE INDEX idx_transactions_savings_goal_id ON Transactions(savings_goal_id); \
         CREATE INDEX idx_transactions_date ON Transactions(transaction_date);",
         "DROP TABLE IF EXISTS Transactions;" 
     },
 
     {
-        7,
+        5,
         "CREATE TABLE BudgetRules ( \
         id INTEGER PRIMARY KEY AUTOINCREMENT, \
         user_id INTEGER NOT NULL, \
@@ -124,18 +80,15 @@ static Migration registry[] = {
         wants_percentage INTEGER NOT NULL DEFAULT 30, \
         savings_percentage INTEGER NOT NULL DEFAULT 20, \
         target_income DECIMAL(15, 2) NOT NULL, \
-        start_date DATE NOT NULL, \
-        end_date DATE NOT NULL, \
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP, \
         FOREIGN KEY (user_id) REFERENCES Users(id) ON DELETE CASCADE \
         ); \
-        CREATE INDEX idx_budget_rules_user_id ON BudgetRules(user_id); \
-        CREATE UNIQUE INDEX idx_budget_rules_unique_period ON BudgetRules(user_id, start_date, end_date);",
+        CREATE INDEX idx_budget_rules_user_id ON BudgetRules(user_id);",
         "DROP TABLE IF EXISTS BudgetRules;" 
     }
 };
 
-#define MIGRATION_COUNT 7 //DONT FORGET TO COUNT EVERYTIME YOU ADD MIGRATIONS
+#define MIGRATION_COUNT 5 //DONT FORGET TO COUNT EVERYTIME YOU ADD MIGRATIONS
 
 int ensure_migration_table(sqlite3 *db) {
      const char* sql = "CREATE TABLE IF NOT EXISTS _migrations ("

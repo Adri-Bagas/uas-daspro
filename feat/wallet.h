@@ -1,0 +1,25 @@
+#ifndef WALLET_H
+#define WALLET_H
+
+typedef struct 
+{
+    int id;
+    int user_id;
+    char name[50];
+    double balance;
+    int allocation;
+    int is_main;
+} Wallet;
+
+void free_wallet(Wallet *wallet);
+void free_wallets(Wallet **wallets);
+int create_wallet_first_time(sqlite3 *db, int userId);
+int create_wallet(sqlite3 *db, char *walletName, int userId, int allocation, int is_main);
+long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int allocation, int is_main);
+Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId);
+Wallet **get_all_wallets_by_user_id_that_are_main(sqlite3 *db, int userId);
+void show_wallet(Wallet **wallets);
+int delete_wallet(sqlite3 *db, int user_id, Wallet *wallet);
+int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wallet, double amount);
+
+#endif

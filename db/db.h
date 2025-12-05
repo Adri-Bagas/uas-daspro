@@ -10,6 +10,8 @@
  * @return int The result code (SQLITE_OK on success)
  */
 int openOrCreateDB(const char* db_name, sqlite3** db);
+void close_db(sqlite3 *db);
+int seed_default_categories(sqlite3 *db);
 
 int migrate_up(sqlite3* db);
 int migrate_down(sqlite3* db);

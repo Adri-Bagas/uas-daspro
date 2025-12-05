@@ -1,9 +1,11 @@
 {
     "files.associations": {
-        "chrono": "c",
-        "text_encoding": "c",
-        "typeinfo": "c",
-        "functional": "c",
-        "db.h": "c"
+        "types.h": "c",
+        "errno.h": "c",
+        "db.h": "c",
+        "budget_rule.h": "c",
+        "stdio.h": "c",
+        "user.h": "c",
+        "menu.h": "c"
     }
 }
