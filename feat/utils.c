@@ -77,24 +77,39 @@ void get_password(char *password, int max_len) {
     #endif
 }
 
-int get_yes_or_no_input(char *question, int default_value){
-    char input;
-    int input_int = default_value;
-    while(1){
-        printf("%s (%s/%s): ", question, default_value ? "Y" : "y", !default_value ? "N" : "n");
-        scanf("%c", &input);
-        if (input == 'y' || input == 'Y' || input == 'n' || input == 'N') {
-            input_int = (input == 'y' || input == 'Y') ? 1 : 0;
-            break;
-        };
-        if(default_value != -1){
-            input_int = default_value;
-            break;
+int get_yes_or_no_input(char *question, int default_value) {
+    char line[256]; // Buffer to hold the input line
+    int input_int = -1;
+
+    while (1) {
+        // 1. Better prompt formatting
+        // Capitalize the default option (Y/n) or (y/N)
+        printf("%s (%s/%s): ", question, 
+               (default_value == 1) ? "Y" : "y", 
+               (default_value == 0) ? "N" : "n");
+        if (fgets(line, sizeof(line), stdin) == NULL) {
+            // Handle error or EOF (optional, usually return default)
+            return (default_value != -1) ? default_value : 0;
+        }
+
+        if (line[0] == '\n') {
+            if (default_value != -1) {
+                return default_value;
+            }
+            // If no default, loop and ask again
+            continue; 
+        }
+
+        // 4. Check the first character
+        char choice = line[0];
+
+        if (choice == 'y' || choice == 'Y') {
+            return 1;
+        } 
+        else if (choice == 'n' || choice == 'N') {
+            return 0;
         }
     }
-   
-    clear_input_buffer();
-    return input_int;
 }
 
 int get_int_input(char *question){

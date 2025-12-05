@@ -9,6 +9,7 @@
 #include "transaction.h"
 #include "category.h"
 #include "calculator.h"
+#include "generate.h"
 
 void handle_wallet_menu(sqlite3 *db, int user_id)
 {
@@ -471,7 +472,7 @@ void menu(sqlite3 *db, User *user)
         }
         else if (strcmp(choice, "6") == 0)
         {
-            
+            generate_report(db, user, 12, 2025);
         }
         else if (strcmp(choice, "7") == 0)
         {
