@@ -36,7 +36,7 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
         if (wallets != NULL)
         {
             show_wallet(wallets);
-            int total_saves = 0;
+            double total_saves = 0;
 
             for (size_t i = 0; i < (sizeof(wallets) / sizeof(wallets[0])); i++)
             {
