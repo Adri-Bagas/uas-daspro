@@ -625,12 +625,7 @@ void menu(sqlite3 *db, User *user)
         }
         else if (strcmp(choice, "7") == 0)
         {
-            // Tampilkan help (Asumsi show_help() mencetak ke layar)
-
-            // show_help(); // Uncomment jika show_help sudah diimplementasi
-            printf("Feature HELP is coming soon...\n");
-            printf("\nPress Enter to return...");
-            getchar();
+            handle_help_menu();
         }
         else if (strcmp(choice, "8") == 0)
         {
