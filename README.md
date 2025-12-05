@@ -35,4 +35,4 @@ Budgeting adalah fitur untuk pengguna agar bisa membuat target yang diinginkan s
 
 ## Get Started
 
-```./fmcom[.exe for windows] init```
+```./fmcon[.exe for windows] help```
