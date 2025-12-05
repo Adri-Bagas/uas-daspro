@@ -107,16 +107,6 @@ int openOrCreateDB(const char* db_name, sqlite3** db) {
         return rc;
     }
 
-    // 3. Configure Database
-    char *err_msg = 0;
-    
-    // Set Journal Mode to DELETE to avoid .wal artifacts
-    sqlite3_exec(*db, "PRAGMA journal_mode = DELETE;", 0, 0, &err_msg);
-    if (err_msg) sqlite3_free(err_msg);
-    
-    // Enable Foreign Keys
-    sqlite3_exec(*db, "PRAGMA foreign_keys = ON;", 0, 0, 0);
-
     printf("Successfully connected to database: %s\n", db_name);
     return SQLITE_OK;
 }

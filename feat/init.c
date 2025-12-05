@@ -42,14 +42,14 @@ void show_onboarding()
     printf("This application helps you organize your money efficiently.\n");
     printf("Here is what you can do:\n\n");
 
-    printf("%s1. Smart Wallets:%s\n", COLOR_GREEN, COLOR_RESET);
-    printf("  Manage multiple accounts (Main, Emergency, Savings) in one place.\n\n");
+    printf("%s1. Wallets:%s\n", COLOR_GREEN, COLOR_RESET);
+    printf("  Manage multiple wallets (Needs, Wants, Savings).\n\n");
 
     printf("%s2. Track Everything:%s\n", COLOR_GREEN, COLOR_RESET);
     printf("  Record Income and Expenses with custom categories.\n\n");
 
-    printf("%s3. Goals & Debts:%s\n", COLOR_GREEN, COLOR_RESET);
-    printf("  Set Savings Goals and track Debt repayments seamlessly.\n\n");
+    printf("%s3. Savings & Debts:%s\n", COLOR_GREEN, COLOR_RESET);
+    printf("  Calculate Savings and Debt interest.\n\n");
 
     printf("%s4. Budgeting:%s\n", COLOR_GREEN, COLOR_RESET);
     printf("  Apply the 50/30/20 rule to control your spending habits.\n\n");
@@ -399,6 +399,11 @@ password_input:
     sql = NULL;
 
     close_db(db);
+
+    printf("Finished setting up your user profile.\n");
+    printf("You can now start organizing your money.\n");
+
+    printf("run the menu command to access the menu, make sure to login with the account that has been just created!");
 
     exit(0);
 }

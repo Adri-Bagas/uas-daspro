@@ -1,6 +1,6 @@
 # PROYEK UAS DASAR PEMROGRAMAN
 
-## Fitur yang akan ada apa saja
+## Fitur yang ada
 
 ### 1. Login Akun
 
@@ -13,18 +13,26 @@ tabungan.
 
 Jadi, ketika ada pengeluaran dari user, dan user sudah mengaktifkan fitur multi wallet, maka akan tampil informasi berupa pengeluaran yang di maksud ini dari mana? apakah dari utama, darurat atau tabungan.
 
-### 3. Spending/Income Report
+### 3. Spending/Income Track and Report
 
 Ketika user melakukan pengeluaran maupun pemasukan, setelahnya ada informasi lebih lanjut dari pemilihan tersebut, informasi yang disediakan seperti kapan pemasukan/pengeluaran dilakukan tanggal bulan kapan , rincian dana multi wallet yang masih ada sisanya.
 
-### 6. Budgeting
+### 4. Calculator
+
+Alat bantu perhitungan bunga untuk tabungan user atau hutang user.
+
+### 5. Budgeting
 
 Budgeting adalah fitur untuk pengguna agar bisa membuat target yang diinginkan seberapa besar, jadi dengan adanya fitur ini, pengguna dapat mengingat kembali target pemasukan/pengeluaran yang diinginkan hanya beberapa saja atau tergantung penggunanya.
 
 ## For Windows
 
-```gcc ./main.c ./sqlite/sqlite3.c -o ./build/main.exe```
+```./build.bat```
 
 ## For Linux
 
-```gcc ./main.c ./sqlite/sqlite3.c -o ./build/main```
+```./build.sh```
+
+## Get Started
+
+```./fmcom[.exe for windows] init```

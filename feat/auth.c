@@ -64,8 +64,8 @@ login_username_input:
 login_password_input:
   printf("Please enter your password (maks. 64, only alphanumeric, no spaces): "
          "\n");
-  fgets(password, 64, stdin);
-  password[strcspn(password, "\n")] = 0;
+
+  get_password(password, 64);
 
   valid = 1;
 

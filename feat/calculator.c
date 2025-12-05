@@ -4,7 +4,7 @@
 #include "utils.h"
 
 double calculate_savings_recursive(int current_month, int total_months, double current_balance, double monthly_deposit, double monthly_rate, double monthly_admin_fee) {
-    // 1. BASE CASE: If we reached the target month, stop and return result.
+    // 1. BASE CASE: kalo dah sampe bulan terakhir langsung return.
     if (current_month >= total_months) {
         return current_balance;
     }
@@ -27,7 +27,7 @@ double calculate_savings_recursive(int current_month, int total_months, double c
 
 int calculate_debt_payoff_recursive(double current_balance, double monthly_payment, double monthly_rate, int current_month, double *total_interest_paid) {
 
-    if (current_balance <= 0) {
+    if (current_balance <= 0) { // Base Case kalo dah habis return bulan nya
         return current_month;
     }
 
