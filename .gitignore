@@ -28,3 +28,7 @@ Thumbs.db
 *.swp
 
 data/
+build/
+
+report.html
+reports.html
