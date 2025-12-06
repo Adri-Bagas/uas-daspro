@@ -5,6 +5,7 @@
 #include "category.h"
 #include "budget_rule.h"
 
+// fungsi untuk bersih bersih
 void free_category(Category *category){
     if (category != NULL) {
 
@@ -16,7 +17,7 @@ void free_category(Category *category){
     }
 }
 
-
+// fungsi untuk bersih bersih, sama tapi buat banyak untuk array struct
 void free_categories(Category **categories){
     if (categories == NULL) {
         return;
@@ -32,7 +33,7 @@ void free_categories(Category **categories){
 }
 
 
-
+// ambil semua data kategori
 Category **get_all_categories(sqlite3 *db)
 {
     sqlite3_stmt *stmt;
@@ -48,7 +49,8 @@ Category **get_all_categories(sqlite3 *db)
 
     Category **categories = NULL;
     int count = 0;
-
+    
+    // loop untuk mengambil semua row
     do
     {
         rc = sqlite3_step(stmt);
@@ -126,6 +128,8 @@ Category **get_all_categories(sqlite3 *db)
     sqlite3_finalize(stmt);
 
     Category **temp = realloc(categories, sizeof(Category*) * (count + 1));
+
+    // tambahkan 1 data null di akhir untuk memudahkan while loop
     if (temp) {
         categories = temp;
         categories[count] = NULL; 

@@ -40,6 +40,7 @@ void show_header()
     printf("  Apply the 50/30/20 rule to control your spending habits.\n\n");
 }
 
+// untuk menampilkan command help
 void print_help(const char *exec_name) {
 
     show_header();

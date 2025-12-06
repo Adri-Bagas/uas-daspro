@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Financial Report - Udin</title>
+    <title>Financial Report - udin</title>
     
     <!-- Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -207,8 +207,8 @@
     <!-- LOGIC SCRIPT -->
     <script>
        //aku muak concat di c wkwkwkwkwkwkw
-       const allocation_array = ['Wants','Needs','Savings'];
-       const allocation_amount = [4040000.00,20000.00,2000.00];
+       const allocation_array = ['Wants'];
+       const allocation_amount = [1000000.00];
 
        let allocation_data = {};
 
@@ -222,19 +222,19 @@
         const reportData = {
             period: "December 2025",
             summary: {
-                income: 50000000.00,
-                expense: 4062000.00,
-                savings: 45938000.00
+                income: 3090000.00,
+                expense: 1000000.00,
+                savings: 2090000.00
             },
             dailyTrend: {
                 labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20", "21", "22", "23", "24", "25", "26", "27", "28", "29", "30", "31"],
-                data: [0.00,0.00,0.00,0.00,4062000.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00],
-                data_income: [0.00,0.00,0.00,50000000.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00]
+                data: [0.00,0.00,0.00,0.00,1000000.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00],
+                data_income: [0.00,0.00,0.00,0.00,3090000.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00,0.00]
             },
             allocation: allocation_data,
             topCategories: {
-                labels: ['Dining Out','Personal Care','Education','Emergency Fund'],
-                data: [4000000.00,40000.00,20000.00,2000.00]
+                labels: ['Online Shopping'],
+                data: [1000000.00]
             }
         };
 

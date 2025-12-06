@@ -5,6 +5,7 @@
 #include "user.h"
 
 // REMEMBER THIS ONE FOR IF ONLY YOU USE MALLOC - bagas
+// Memudahkan Beresihkan Memori
 void free_user(User *data)
 {
     if (data == NULL)
@@ -33,6 +34,7 @@ User* get_user_by_username(sqlite3 *db, const char *username)
 
     sqlite3_bind_text(stmt, 1, username, -1, SQLITE_STATIC);
 
+    // menggunakan do loop agar memastikan sqlite3_step dijalankan setidaknya sekali
     do
     {
         rc = sqlite3_step(stmt);
@@ -50,6 +52,7 @@ User* get_user_by_username(sqlite3 *db, const char *username)
                 4. created_at
             */
 
+            // kalo ada data, buat user
             user = (User *)malloc(sizeof(User));
 
             if (user == NULL)
@@ -100,6 +103,7 @@ User* get_user_by_username(sqlite3 *db, const char *username)
     return user;
 }
 
+// inset user ke db, return id, kenapa long long? karena sqlite3_last_insert_rowid() return long long (bisa aja sih sebernernya ke Int)
 long long insert_user(sqlite3 *db, const char *username, const unsigned char *hash)
 {
     sqlite3_stmt *stmt;

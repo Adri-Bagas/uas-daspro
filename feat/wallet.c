@@ -126,6 +126,7 @@ int delete_wallet(sqlite3 *db, int user_id, Wallet *wallet){
 
     printf("Deleting wallet '%s'\n", wallet->name);
 
+    // cek kalo main, terhubung secara langsung dengan aturan budget tidak bisa dihapus
     if(wallet->is_main){
         fprintf(stderr, "Cannot delete that is main wallet\n");
         return -1;
@@ -160,15 +161,18 @@ int delete_wallet(sqlite3 *db, int user_id, Wallet *wallet){
     return 0;
 }
 
+// coba transfer data
 int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wallet, double amount){
 
     printf("Transferring %.2f from wallet '%s' to wallet '%s'\n", amount, from_wallet->name, to_wallet->name);
 
+    // check kalau saldo kurang btalkan
     if (from_wallet->balance < amount){
         printf("Insufficient funds in wallet '%s'\n", from_wallet->name);
         return -1;
     }
 
+    // kali ini menggunakan transaction, karena ada beberapa qury yang dijalankan, untuk memastikan data bisa di rollback dan tidak error
     int rc = sqlite3_exec(db, "BEGIN TRANSACTION;", 0, 0, 0);
 
     if (rc != SQLITE_OK)
@@ -186,6 +190,7 @@ int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wal
 
     rc = sqlite3_prepare_v2(db, sql, -1, &stmt, 0);
 
+    // kalo error rollback
     if (rc != SQLITE_OK)
     {
         sqlite3_exec(db, "ROLLBACK;", 0, 0, 0);
@@ -283,6 +288,7 @@ int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wal
 
     sqlite3_finalize(stmt);
 
+    // kalo berhasil commit
     rc = sqlite3_exec(db, "COMMIT;", 0, 0, 0);
 
     if (rc != SQLITE_OK)
@@ -295,6 +301,7 @@ int transfer_funds(sqlite3 *db, int user_id, Wallet *from_wallet, Wallet *to_wal
     return 0;
 }
 
+// sebenernya sama kayak yang diatas, hanya saja yang ini return long long
 long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int allocation, int is_main)
 {
     sqlite3_stmt *stmt;
@@ -331,43 +338,7 @@ long long create_wallet_return_id(sqlite3 *db, char *walletName, int userId, int
     return new_id;
 };
 
-// Wallet *get_wallets_by_user_id(sqlite3 *db, int userId)
-// {
-//     sqlite3_stmt *stmt;
-//     const char *sql = "SELECT id, user_id, name, balance, allocation_percentage FROM wallets WHERE user_id = ?";
-
-//     int rc = sqlite3_prepare_v2(db, sql, -1, &stmt, NULL);
-
-//     if (rc != SQLITE_OK)
-//     {
-//         fprintf(stderr, "Failed to prepare statement: %s\n", sqlite3_errmsg(db));
-//         exit(1);
-//     }
-
-//     sqlite3_bind_int(stmt, 1, userId);
-
-//     rc = sqlite3_step(stmt);
-
-//     if (rc == SQLITE_ROW)
-//     {
-//         Wallet *wallet = malloc(sizeof(Wallet));
-//         wallet->id = sqlite3_column_int(stmt, 0);
-//         wallet->user_id = sqlite3_column_int(stmt, 1);
-//         strcpy(wallet->name, (char *)sqlite3_column_text(stmt, 2));
-//         wallet->balance = sqlite3_column_double(stmt, 3);
-//         wallet->allocation = sqlite3_column_int(stmt, 4);
-
-//         sqlite3_finalize(stmt);
-
-//         return wallet;
-//     }
-//     else
-//     {
-//         sqlite3_finalize(stmt);
-//         return NULL;
-//     }
-// }
-
+// fungsi untuk menampilkan semua wallet
 void show_wallet(Wallet **wallets)
 {
 
@@ -412,6 +383,7 @@ void show_wallet(Wallet **wallets)
 
 }
 
+// fungsi untuk menampilkan semua wallet sesuai dengan user_id
 Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
 {
     sqlite3_stmt *stmt;
@@ -499,6 +471,8 @@ Wallet **get_all_wallets_by_user_id(sqlite3 *db, int userId)
     return wallets;
 }
 
+
+// sama sepetrti fungsi diatas cuma beda query karena hanya mengambil main wallet saja
 Wallet **get_all_wallets_by_user_id_that_are_main(sqlite3 *db, int userId)
 {
     sqlite3_stmt *stmt;

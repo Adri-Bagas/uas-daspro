@@ -21,7 +21,7 @@
 
 void handle_wallet_menu(sqlite3 *db, int user_id)
 {
-    // We declare the pointer here, but we load data INSIDE the loop
+
     Wallet **wallets = NULL;
     char choice[5];
 
@@ -71,7 +71,7 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
         // --- OPTION 1: ADD ---
         if (strcmp(choice, "1") == 0)
         {
-            // clear_screen(); // Optional, feels snappier without it here
+            // clear_screen();
             printf("\n--- Create Wallet ---\n");
             printf("Enter wallet name: ");
 
@@ -334,15 +334,18 @@ void handle_spending_menu(sqlite3 *db, int user_id)
 
 void handle_history_menu(sqlite3 *db, int user_id)
 {
+    // Inisialisasi variabel
     Transaction **transactions = NULL;
     char choice[5];
 
     while (1)
     {
         clear_screen();
+         // Get transactions if not geted yet
         if (transactions == NULL)
             transactions = get_all_transactions_by_user_id(db, user_id);
 
+        // Handle error
         if (transactions == NULL)
         {
             printf("Failed to fetch transactions\n");
@@ -358,11 +361,13 @@ void handle_history_menu(sqlite3 *db, int user_id)
         printf("4. Back\n");
         printf("Select option (1-4): ");
 
+        // membaca pilihan user
         if (fgets(choice, sizeof(choice), stdin) == NULL)
             continue;
 
         choice[strcspn(choice, "\n")] = 0;
 
+        // Filter by date range
         if (strcmp(choice, "1") == 0)
         {
             printf("Enter the starting date (YYYY-MM-DD): ");
@@ -410,7 +415,6 @@ void handle_history_menu(sqlite3 *db, int user_id)
             {
                 show_transactions_table(filtered);
             }
-            show_transactions_table(filtered);
 
             free_transactions(filtered);
             filtered = NULL;
@@ -418,6 +422,7 @@ void handle_history_menu(sqlite3 *db, int user_id)
             printf("Press enter to continue...");
             getchar();
         }
+         // Filter by month and year
         else if (strcmp(choice, "2") == 0)
         {
             printf("Enter the month (1-12): ");
@@ -454,6 +459,7 @@ void handle_history_menu(sqlite3 *db, int user_id)
             printf("Press enter to continue...");
             getchar();
         }
+        // Sort by amount
         else if (strcmp(choice, "3") == 0)
         {
             // 1. Hitung jumlah data (karena array diakhiri NULL)
@@ -481,10 +487,12 @@ void handle_history_menu(sqlite3 *db, int user_id)
             printf(">> Data sorted by Amount (High to Low).\n");
             continue;
         }
+        // balik ke menu
         else if (strcmp(choice, "4") == 0)
         {
             break;
         }
+        // kalo error
         else
         {
             printf("Invalid option\n");
@@ -497,6 +505,7 @@ void handle_history_menu(sqlite3 *db, int user_id)
         }
     }
 
+    // bersihin RAM heap
 exit_history_menu:
     if (transactions != NULL)
     {
@@ -516,6 +525,7 @@ void handle_report_menu(sqlite3 *db, User *user)
     char month[3];
     char year[5];
 
+    // ambil input dari user bulan dan tahun
     while (1)
     {
         printf("Enter the month (1-12): ");
@@ -546,6 +556,7 @@ void handle_report_menu(sqlite3 *db, User *user)
         printf("Invalid year.\n");
     }
 
+    // generate report
     generate_report(db, user, atoi(month), atoi(year));
 }
 
@@ -662,11 +673,13 @@ void handle_help_menu()
 
 void menu(sqlite3 *db, User *user)
 {
+    // reset layar
     clear_screen();
     char choice[5];
 
     while (1)
     {
+        // reset layar kembali
         clear_screen();
         // print_header();
         printf("MAIN MENU\n");
@@ -682,14 +695,15 @@ void menu(sqlite3 *db, User *user)
         printf("----------------\n");
         printf("Select option (1-8): ");
 
+        // pilih menu
         if (fgets(choice, sizeof(choice), stdin) == NULL)
             continue;
 
         choice[strcspn(choice, "\n")] = 0;
 
+        // jalankan menu selanjutnya setelah pilihan dipilih
         if (strcmp(choice, "1") == 0)
         {
-
             handle_wallet_menu(db, user->id);
         }
         else if (strcmp(choice, "2") == 0)
@@ -716,12 +730,7 @@ void menu(sqlite3 *db, User *user)
         }
         else if (strcmp(choice, "7") == 0)
         {
-            // Tampilkan help (Asumsi show_help() mencetak ke layar)
-
-            // show_help(); // Uncomment jika show_help sudah diimplementasi
-            printf("Feature HELP is coming soon...\n");
-            printf("\nPress Enter to return...");
-            getchar();
+            handle_help_menu();
         }
         else if (strcmp(choice, "8") == 0)
         {

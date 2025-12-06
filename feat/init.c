@@ -59,8 +59,11 @@ void show_onboarding()
     printf("----------------------------------------\n" COLOR_RESET);
 }
 
+
+// menerima folder dan filename
 void init(char *folder, char *filename)
 {
+    // inisiasi variable
     sqlite3 *db;
     int err;
     int result = -1;
@@ -79,6 +82,7 @@ void init(char *folder, char *filename)
 
     sprintf(path, "%s/%s", folder, filename);
 
+    // coba buat / baca db, jika berhasil lanjutkan, gagal close program
     err = openOrCreateDB(path, &db);
 
     if (err)
@@ -92,6 +96,7 @@ void init(char *folder, char *filename)
         fprintf(stderr, "Opened database successfully\n");
     }
 
+    // jalan kan migrasi
     err = migrate_up(db);
 
     if (err != SQLITE_OK)
@@ -101,6 +106,7 @@ void init(char *folder, char *filename)
         exit(1);
     }
 
+    // jalan kan seeder
     err = seed_default_categories(db);
 
     if (err)
@@ -110,17 +116,19 @@ void init(char *folder, char *filename)
         exit(1);
     }
     
-    SLEEP_SECONDS(5);
+    // tinggu 5 detik agar user dapat diberikan ruang waktu
+    SLEEP_SECONDS(3);
     // TODO: ASK About Login info
 
+    // menampilkan onboarding screen
     show_onboarding();
 
-    // USE 64 for username and password max length
+    // USE 64 Untuk username and password max length
     char username[64];
     char password[64];
     char confirmation[64];
     int valid = 1;
-
+// Input Username
 username_input:
     printf("Please enter your desired username (maks. 64, only alphanumeric, no spaces): \n");
 
@@ -129,6 +137,7 @@ username_input:
 
     for (int i = 0; username[i] != '\0'; i++)
     {
+        // untuk cek apakah alphanumeric
         if (!isalnum(username[i]))
         {
             valid = 0;
@@ -143,6 +152,7 @@ username_input:
         goto username_input;
     }
 
+    // cek apakah username sudah ada
     sql = strdup("SELECT COUNT(*) FROM users WHERE username = ?");
 
     if (sql == NULL)
@@ -168,15 +178,18 @@ username_input:
         fprintf(stderr, "Execution failed: %s\n", sqlite3_errmsg(db));
     }
 
+    // jika sudah ada munculkan error
     if (count != 0)
     {
         fprintf(stderr, "Username already exist! please try again!");
         strcpy(username, "");
+        // goto dipakai untuk pengganti while loop, lebih mudah dibaca
         goto username_input;
     }
 
     sqlite3_finalize(stmt);
 
+// input password yang diignkan
 password_input:
     printf("Please enter your password (maks. 64, only alphanumeric, no spaces): \n");
 
@@ -211,6 +224,7 @@ password_input:
         goto password_input;
     }
 
+    // kurang lebih sama seperti tadi, hanya saja kali ini kita cek apakah password untuk konfirmasi sudah sama atau tidak
     if (strcmp(password, confirmation) != 0)
     {
         fprintf(stderr, "Password not matching! please try again!\n");
@@ -231,8 +245,10 @@ password_input:
     int yn_input = 1;
     int is_budgeting_active = 0;
 
+    // tanyakan mau pakai budgeting automatis?
     yn_input = get_yes_or_no_input("Do you wanna use the automatic budgeting system (50% needs, 30% wants, 20% savings) ?:", 1);
 
+    // jika ya buatkan langsung
     if (yn_input)
     {
         // TODO: DO BUDGETING STUFF
@@ -260,6 +276,7 @@ password_input:
 
         is_budgeting_active = 1;
     }
+    // jika tidak maka tanyakan mau buat manual? atau tidak pakai sama sekali
     else
     {
         yn_input = get_yes_or_no_input("Do you want to setup the budgeting system manually ?:", 1);
@@ -354,6 +371,7 @@ password_input:
 
     long long wallet_id = 0;
 
+    // yang tadi jika budgeting tidak aktif maka buat main wallet
     if (!is_budgeting_active)
     {
         // TODO: MAKE A MAIN WALLET
@@ -371,6 +389,7 @@ password_input:
         printf("Main wallet created.\n");
     }
     else
+    // jika budgeting aktif buat wallet sesuai aturan budget nya
     {
         printf("Budgeting is active.\n");
 
@@ -386,8 +405,10 @@ password_input:
 
     yn_input = 1;
 
+    // tanyakan mau add money
     yn_input = get_yes_or_no_input("Do you want to add some money to the balance ?", 1);
 
+    // kalau mau catat sebagai income
     if (yn_input)
     {
         create_income(db, userId, (int)wallet_id, "Main");
@@ -400,6 +421,7 @@ password_input:
 
     close_db(db);
 
+    // selesai
     printf("Finished setting up your user profile.\n");
     printf("You can now start organizing your money.\n");
 
