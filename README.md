@@ -27,7 +27,7 @@ Budgeting adalah fitur untuk pengguna agar bisa membuat target yang diinginkan s
 
 ## For Windows
 
-```./build.bat```
+```build.bat```
 
 ## For Linux
 
