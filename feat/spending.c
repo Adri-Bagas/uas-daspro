@@ -6,18 +6,7 @@
 #include "category.h"
 #include "wallet.h"
 
-/**
- * Insert a spending transaction into the database.
- *
- * @param db The database connection
- * @param amount The amount of the spending
- * @param userId The user ID of the spending
- * @param wallet_id The wallet ID of the spending
- * @param wallet_name The name of the wallet of the spending
- * @param category_id The category ID of the spending
- *
- * @return 0 on success, 1 on failure
- */
+// function untuk memasukan spending ke DB
 int insert_spending(sqlite3 *db, double amount, int userId, int wallet_id, char *wallet_name, int category_id)
 {
 
@@ -77,10 +66,12 @@ int insert_spending(sqlite3 *db, double amount, int userId, int wallet_id, char 
     return 0;
 }
 
+// function untuk memasukan spending
 int create_spending(sqlite3 *db, int userId, int wallet_id, char *wallet_name, int category_id)
 {
     double amount;
 
+    // amount input 
 amount_input:
     amount = get_double_input("Enter amount of money you wanna spend (input 0 to cancel/skip) ");
 
@@ -96,12 +87,16 @@ amount_input:
         goto amount_input;
     }
 
+    // coba cek apakah sudah ada category dalam parameter
     int selected_category_id = category_id;
 
+    // jika ada, berarti tidak perlu untuk memilih kategory, biasanya dibawah 0 karena tidak ada id 0 dalam db
     if (selected_category_id < 1)
     {
+        // load semua ketegori
         Category **category = get_all_categories(db);
 
+        // tampilkan semua category
         if (category != NULL)
         {
             int i = 0;
@@ -111,6 +106,7 @@ amount_input:
                 i++;
             }
 
+            // pilih kategori
         category_selection_spending:
             int category_input = get_int_input("Select category (input 0 to cancel): ");
 
@@ -141,10 +137,12 @@ amount_input:
             return 0;
         }
 
+        // wallet selection
         Wallet **wallets = get_all_wallets_by_user_id(db, userId);
 
         if (wallets != NULL)
         {
+            // tampilkan semua wallet
             int i = 0;
             while (wallets[i] != NULL)
             {
@@ -185,6 +183,7 @@ amount_input:
 
             free_wallets(wallets);
 
+            // insert spending
             insert_spending(db, amount, userId, selected_wallet_id, selected_wallet_name, selected_category_id);
             return 0;
         }

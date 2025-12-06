@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "wallet.h"
 
+// function untuk memasukan income ke DB
 int insert_income(sqlite3 *db, double amount, int userId, int wallet_id, char *wallet_name)
 {
 
@@ -63,12 +64,15 @@ int insert_income(sqlite3 *db, double amount, int userId, int wallet_id, char *w
     return 0;
 }
 
+// process untuk memasukan income ke db
 int create_income(sqlite3 *db, int userId, int wallet_id, char *wallet_name)
 {
+    // coba ambil budget rule
     BudgetRule *rule = get_budget_rule_by_user_id(db, userId);
 
     double amount;
 
+    // ambil amount
 amount_input:
     amount = get_double_input("Enter amount of money you wanna add (input 0 to cancel/skip) ");
 
@@ -84,13 +88,14 @@ amount_input:
         goto amount_input;
     }
 
-    // check untuk wallet kalo nggak ada di database
+    // check untuk wallet kalo nggak ada di database untuk bisa bypass pemilihan wallet
     if (wallet_id > 0)
     {
         insert_income(db, amount, userId, wallet_id, wallet_name);
         return 0;
     }
 
+    // check kalau tidak ada budget rule, langsung pilih wallet
     if (rule == NULL)
     {
         fprintf(stderr, "Budget rule not found for user ID %d.\n", userId);
@@ -141,8 +146,10 @@ amount_input:
         return 1;
     }
 
+    // tanyakan apakah mau assign secara manual
     int yn_input = get_yes_or_no_input("Wanna assign income manually?", 0);
 
+    // jika ya pilih wallet lalu masukan ke wallet tersebut
     if (yn_input)
     {
         Wallet **wallets = get_all_wallets_by_user_id(db, userId);
@@ -188,6 +195,8 @@ amount_input:
         }
         return 1;
     }
+
+    // jika tidak alokasikan secara otomatis
 
     double needs_amount = (double)(amount * (rule->needs_percentage / 100.0));
     double wants_amount = (double)(amount * (rule->wants_percentage / 100.0));

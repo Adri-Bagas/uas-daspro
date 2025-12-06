@@ -74,6 +74,7 @@ Transaction **fetch_transactions_from_stmt(sqlite3_stmt *stmt) {
     return transactions;
 }
 
+
 Transaction **get_transactions_by_date_range(sqlite3 *db, int user_id, const char *start_date, const char *end_date) {
     sqlite3_stmt *stmt;
     
@@ -143,7 +144,7 @@ Transaction **get_transactions_by_month_year(sqlite3 *db, int user_id, int month
 Transaction **get_all_transactions_by_user_id_with_limit(sqlite3 *db, int user_id, int limit) {
     sqlite3_stmt *stmt;
     
-    // We join Wallets and Categories to get the names directly
+    // query dengan join untuk memudahkan pengambilan data
     const char *sql = 
         "SELECT t.id, t.user_id, t.wallet_id, t.category_id, "
         "t.type, t.amount, t.description, t.transaction_date, "
@@ -181,7 +182,7 @@ Transaction **get_all_transactions_by_user_id_with_limit(sqlite3 *db, int user_i
 Transaction **get_all_transactions_by_user_id(sqlite3 *db, int user_id) {
     sqlite3_stmt *stmt;
     
-    // We join Wallets and Categories to get the names directly
+    // query dengan join untuk memudahkan pengambilan data
     const char *sql = 
         "SELECT t.id, t.user_id, t.wallet_id, t.category_id, "
         "t.type, t.amount, t.description, t.transaction_date, "
@@ -211,7 +212,7 @@ void show_transactions_table(Transaction **transactions) {
         return;
     }
 
-    // Widths: Date, Type, Wallet, Category, Amount, Description
+    // Widths: Date, Type, Wallet, Category, Amount
     int w[] = {19, 8, 15, 26, 12}; 
     int cols = 5;
 
@@ -229,7 +230,7 @@ void show_transactions_table(Transaction **transactions) {
     while (transactions[i] != NULL) {
         Transaction *t = transactions[i];
 
-        // Truncate description if it's too long for the table
+        // Truncate description kalo terlalu panjang buat tabel
         char short_cat[26]; 
         snprintf(short_cat, 26, "%s", t->category_name);
 
@@ -244,7 +245,7 @@ void show_transactions_table(Transaction **transactions) {
                w[1], t->type,
                w[2], t->wallet_name,
                w[3], short_cat,
-               w[4], amount // Right align numbers usually looks better
+               w[4], amount 
             );
         i++;
     }

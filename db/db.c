@@ -26,18 +26,6 @@ void ensure_db_dir() {
 }
 
 
-/**
- * Encrypts/decrypts a file using XOR with the provided key.
- *
- * This function reads the input file in chunks of size BUFFER_SIZE,
- * encrypts/decrypts each chunk using XOR with the key, and writes
- * the encrypted/decrypted chunk to the output file.
- *
- * @param input_path The path to the input file.
- * @param output_path The path to the output file.
- *
- * @return 1 if the file was successfully processed, 0 otherwise.
- */
 int process_file(const char *input_path, const char *output_path) {
     FILE *in = fopen(input_path, "rb");
     FILE *out = fopen(output_path, "wb");

@@ -3,6 +3,7 @@
 #include <string.h>
 #include "generate.h"
 
+// bagian header dari html
 #define HEADER "<!DOCTYPE html>\n"                                                                                                                        \
                "<html lang=\"en\">\n"                                                                                                                     \
                "<head>\n"                                                                                                                                 \
@@ -50,6 +51,7 @@
                "    </style>\n"                                                                                                                           \
                "</head>\n"
 
+// Main HTML Body tempat injek data
 #define BODY "<body class=\"text-slate-800 antialiased\"> \n"                                                                                                                                                                                                                                                                         \
              "    <!-- Top Navigation / Header -->\n"                                                                                                                                                                                                                                                                                 \
              "    <nav class=\"bg-white border-b border-slate-200 sticky top-0 z-50\">\n"                                                                                                                                                                                                                                             \
@@ -388,8 +390,10 @@
              "    </script>\n"                                                                                                                                                                                                                                                                                                        \
              "</body>\n"
 
+// untuk pembatas akhir cuma ini doang dulu
 #define FOOTER "</html>"
 
+// helper buat menginversi int ke nama bulan
 static char *get_month_name(int month)
 {
     switch (month)
@@ -436,6 +440,7 @@ static char *get_month_name(int month)
     }
 }
 
+// helper untuk mengonversi data double ke string
 static char *concat_double_array_to_string(double *arr, int size, const char *separator)
 {
     if (arr == NULL || size <= 0)
@@ -446,6 +451,7 @@ static char *concat_double_array_to_string(double *arr, int size, const char *se
     // Estimate maximum length for each double + separator + null terminator
     // A reasonable estimate for a double might be around 20 characters (including sign, decimal, and exponent)
     // Plus the length of the separator.
+    // tapi karena ku kurangi jadi .2 data di belakang decimal point jadi ku kurangi juga 5 byte awalnya 26 btw
     int estimated_len_per_double = 21;
     size_t total_len = size * estimated_len_per_double + (size > 0 ? (size - 1) * strlen(separator) : 0) + 1; // +1 for null terminator
 
@@ -473,6 +479,7 @@ static char *concat_double_array_to_string(double *arr, int size, const char *se
     return result_string;
 }
 
+// helper untuk mengonversi array string ke string yang ada '' untuk bnisa dibaca js
 static char *concat_array_strings_with_quotes(char *strings[], int count, const char *separator)
 {
     if (count == 0)
@@ -521,6 +528,7 @@ static char *concat_array_strings_with_quotes(char *strings[], int count, const 
     return result;
 }
 
+// helper buat menghitung sum
 static double get_sum(sqlite3 *db, const char *sql, int user_id, const char *start_date, const char *end_date)
 {
     sqlite3_stmt *stmt;
@@ -541,6 +549,7 @@ static double get_sum(sqlite3 *db, const char *sql, int user_id, const char *sta
 // return err status
 int generate_report(sqlite3 *db, User *user, int month, int year)
 {
+    // coba baca file nya
     FILE *f = fopen("report.html", "w");
 
     if (f == NULL)
@@ -653,9 +662,11 @@ int generate_report(sqlite3 *db, User *user, int month, int year)
     // Finalize the second statement
     sqlite3_finalize(stmt);
 
+    // ubah data yang tadi kedalam bentuk string
     char *concat_income_per_day = concat_double_array_to_string(income_per_day, 31, ",");
     char *concat_expense_per_day = concat_double_array_to_string(expense_per_day, 31, ",");
 
+    // ambil data persen alokasi
     const char *allocation_percentage_sql = "SELECT Categories.budget_bucket, COALESCE(SUM(amount), 0) FROM transactions JOIN Categories ON transactions.category_id = Categories.id WHERE user_id = ? AND date(transaction_date) BETWEEN date(?) AND date(?) AND Categories.type = 'expense' GROUP BY Categories.budget_bucket ORDER BY SUM(amount) DESC";
 
     if (sqlite3_prepare_v2(db, allocation_percentage_sql, -1, &stmt, 0) != SQLITE_OK)
@@ -729,11 +740,13 @@ int generate_report(sqlite3 *db, User *user, int month, int year)
 
     } while (rc == SQLITE_ROW);
 
+    // ubah lagi kedalam bentuk string
     char *concat_allocation_name = concat_array_strings_with_quotes(allocation_name, count, ",");
     char *concat_allocation_amount = concat_double_array_to_string(allocation_amount, count, ",");
 
     sqlite3_finalize(stmt);
 
+    // lakukan hal yang sama dengan query yang berbeda untuk mendapatkan data per category
     const char *categories_spending_sql = "SELECT Categories.name, COALESCE(SUM(amount), 0) FROM transactions JOIN Categories ON transactions.category_id = Categories.id WHERE user_id = ? AND date(transaction_date) BETWEEN date(?) AND date(?) AND Categories.type = 'expense' GROUP BY Categories.name ORDER BY SUM(amount) DESC";
 
     if (sqlite3_prepare_v2(db, categories_spending_sql, -1, &stmt, 0) != SQLITE_OK)
@@ -808,10 +821,12 @@ int generate_report(sqlite3 *db, User *user, int month, int year)
     char *concat_expense_per_category_names = concat_array_strings_with_quotes(categories_spending_name, c_count, ",");
     char *concat_expense_per_category_amount = concat_double_array_to_string(categories_spending_amount, c_count, ",");
 
+    // sisipkan data sesuai urutan
     fprintf(f, HEADER, user->username);
     fprintf(f, BODY, concat_allocation_name, concat_allocation_amount, month_year_verbose, total_income, total_expense, total_balance, concat_expense_per_day, concat_income_per_day, concat_expense_per_category_names, concat_expense_per_category_amount);
     fprintf(f, FOOTER);
 
+    // tutup file
     fclose(f);
 
     printf("Report generated successfully. at ./report.html\n");
@@ -819,6 +834,7 @@ int generate_report(sqlite3 *db, User *user, int month, int year)
     printf("Press Enter to continue...'\n");
     getchar();
 
+    // beberes memory yang di pakai
     free(concat_income_per_day);
     free(concat_expense_per_day);
 

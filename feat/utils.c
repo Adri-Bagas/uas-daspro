@@ -42,6 +42,7 @@ void get_password(char *password, int max_len) {
             ch = _getch();
             if (ch == 13) { // Enter key
                 password[i] = '\0';
+                printf("\n");
                 break;
             } else if (ch == 8) { // Backspace
                 if (i > 0) {

@@ -15,8 +15,10 @@ User *login(sqlite3 *db) {
 
   int err = 0;
 
+  // pastikan dir data ada
   ensure_data_dir(); 
 
+  // kalau ada file seession, baca isinya terus login pakai data yang sudah di decrypt
   if(fileExists("data/session.txt")){
     FILE *f = fopen("data/session.txt", "r");
 
@@ -42,6 +44,7 @@ User *login(sqlite3 *db) {
     }
   }
 
+  // input username
 login_username_input:
   printf("Please enter your username (maks. 64, only alphanumeric, no spaces): "
          "\n");
@@ -61,6 +64,7 @@ login_username_input:
     goto login_username_input;
   }
 
+  // input password
 login_password_input:
   printf("Please enter your password (maks. 64, only alphanumeric, no spaces): "
          "\n");
@@ -88,12 +92,14 @@ login_password_input:
     exit(1);
   }
 
+  //try hasihing password nya
   unsigned long long_hashed = hash((unsigned char *)password);
 
   // must be unsigned char for some reason
   char hashed_password[32];
   snprintf(hashed_password, sizeof(hashed_password), "%ld", long_hashed);
 
+  // kalau sama password nya bener
   if (strcmp(hashed_password, user->password) == 0) {
     int yn_input = get_yes_or_no_input("Save login session?", 0);
 
@@ -108,10 +114,12 @@ login_password_input:
     return user;
   }
 
+  // kalo nggak langsung keluar
   free_user(user);
   exit(1);
 }
 
+// log out cuma hapus session
 void logout(){
   if(fileExists("data/session.txt")){
     remove("data/session.txt");
