@@ -52,19 +52,24 @@ int calculate_debt_payoff_recursive(double current_balance, double monthly_payme
 }
 
 void show_calculator_menu() {
-    char buffer[100];
     int choice;
+    int invalid_input = 0;
 
+    start_calc:
     clear_screen();
     printf("FINANCIAL CALCULATORS\n");
     printf("------------------------------\n");
     printf("1. Savings Projection (Future Value)\n");
     printf("2. Debt Payoff Estimator (Time to Freedom)\n");
+    printf("3. Return to Main Menu\n");
     printf("------------------------------\n");
-    printf("Select Calculator (1-2): ");
+    if (invalid_input)
+    {
+        fprintf(stderr, "Invalid selection.\n");
+        invalid_input = 0;
+    }
     
-    if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-    choice = atoi(buffer);
+    choice = get_int_input("Select Calculator (1-3): ");
 
     if (choice == 1) {
         clear_screen();
@@ -73,25 +78,15 @@ void show_calculator_menu() {
         int years;
 
         printf("\n--- SAVINGS PROJECTION ---\n");
-        printf("Current Savings Amount: ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        initial_amount = atof(buffer);
+        initial_amount = get_double_input("Current Savings Amount ");
 
-        printf("Monthly Contribution: ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        monthly_deposit = atof(buffer);
+        monthly_deposit = get_double_input("Monthly Contribution ");
 
-        printf("Annual Interest Rate (%): ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        annual_interest = atof(buffer);
+        annual_interest = get_double_input("Annual Interest Rate (%) ");
 
-        printf("Monthly Admin Fee: ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        monthly_admin_fee = atof(buffer);
+        monthly_admin_fee = get_double_input("Monthly Admin Fee ");
 
-        printf("Duration (Years): ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        years = atoi(buffer);
+        years = get_int_input("Duration (Years)");
 
         double monthly_rate = (annual_interest / 100.0) / 12.0;
         int total_months = years * 12;
@@ -110,16 +105,13 @@ void show_calculator_menu() {
         
         printf("\n--- DEBT PAYOFF ESTIMATOR ---\n");
         printf("Total Debt Amount: ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        total_debt = atof(buffer);
+        total_debt = get_double_input("");
 
         printf("Annual Interest Rate (%): ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        annual_interest = atof(buffer);
+        annual_interest = get_double_input("");
 
         printf("Monthly Payment Budget: ");
-        if (fgets(buffer, sizeof(buffer), stdin) == NULL) return;
-        monthly_payment = atof(buffer);
+        monthly_payment = get_double_input("");
 
         // Validation: Payment must cover interest
         double monthly_rate = (annual_interest / 100.0) / 12.0;
@@ -145,8 +137,12 @@ void show_calculator_menu() {
                 printf("Total Amount Paid: %.2f\n", total_debt + total_interest);
             }
         }
+    }
+    else if (choice == 3) {
+        return;
     } else {
-        fprintf(stderr, "Invalid selection.");
+        invalid_input = 1;
+        goto start_calc;
     }
     
     printf("\nPress Enter to return...");

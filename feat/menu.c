@@ -41,7 +41,8 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
             int count = 0;
             while (1)
             {
-                if (wallets[count] == NULL) break;
+                if (wallets[count] == NULL)
+                    break;
                 total_saves += wallets[count]->balance;
                 count++;
             }
@@ -79,6 +80,14 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
             fgets(wallet_name, 64, stdin);
             wallet_name[strcspn(wallet_name, "\n")] = 0;
 
+            if (strlen(wallet_name) == 0)
+            {
+                printf(">> Wallet name cannot be empty.\n");
+                printf("Press enter to continue...");
+                getchar();
+                continue;
+            }
+
             int wallet_id = create_wallet(db, wallet_name, user_id, 0, 0);
 
             if (wallet_id != -1)
@@ -108,7 +117,7 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
                     i++;
                 }
 
-                int wallet_input = get_int_input("Select wallet (input 0 to cancel): ");
+                int wallet_input = get_int_input("Select wallet (input 0 to cancel) ");
 
                 if (wallet_input > 0 && wallet_input <= i)
                 {
@@ -163,7 +172,7 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
                     }
 
                 from_wallet_selection:
-                    wallet_input = get_int_input("Select wallet you wanna get money from! (input 0 to cancel): ");
+                    wallet_input = get_int_input("Select wallet you wanna get money from! (input 0 to cancel) ");
 
                     if (wallet_input == 0)
                     {
@@ -197,7 +206,7 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
                     }
 
                 to_wallet_selection:
-                    wallet_input = get_int_input("Select wallet you wanna put the money! (input 0 to cancel): ");
+                    wallet_input = get_int_input("Select wallet you wanna put the money! (input 0 to cancel) ");
 
                     if (wallet_input == 0)
                     {
@@ -220,6 +229,12 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
                 if (from_wallet == NULL || to_wallet == NULL)
                 {
                     printf("Wallet not selected\n");
+                    goto from_wallet_selection;
+                }
+
+                if (from_wallet->id == to_wallet->id)
+                {
+                    printf("Cannot transfer to the same wallet\n");
                     goto from_wallet_selection;
                 }
 
@@ -265,10 +280,22 @@ void handle_wallet_menu(sqlite3 *db, int user_id)
         {
             printf("\n--- Search Wallet ---\n");
             printf("Enter wallet name keyword: ");
-
             char keyword[64];
-            fgets(keyword, 64, stdin);
-            keyword[strcspn(keyword, "\n")] = 0;
+            while (1)
+            {
+                fgets(keyword, 64, stdin);
+                keyword[strcspn(keyword, "\n")] = 0;
+
+                if (strlen(keyword) == 0)
+                {
+                    printf("Keyword cannot be empty!\n");
+                    continue;
+                }
+                else
+                {
+                    break;
+                }
+            }
 
             printf("\n>> Search Results for '%s':\n", keyword);
             printf("--------------------------------\n");
@@ -341,7 +368,7 @@ void handle_history_menu(sqlite3 *db, int user_id)
     while (1)
     {
         clear_screen();
-         // Get transactions if not geted yet
+        // Get transactions if not geted yet
         if (transactions == NULL)
             transactions = get_all_transactions_by_user_id(db, user_id);
 
@@ -408,7 +435,10 @@ void handle_history_menu(sqlite3 *db, int user_id)
 
             if (filtered == NULL)
             {
-                printf("Failed to fetch transactions\n");
+                fprintf(stderr, "Failed to fetch transactions\n");
+                printf("Pressed enter to continue...\n");
+                getchar();
+                continue;
             }
 
             if (filtered != NULL)
@@ -422,33 +452,39 @@ void handle_history_menu(sqlite3 *db, int user_id)
             printf("Press enter to continue...");
             getchar();
         }
-         // Filter by month and year
+        // Filter by month and year
         else if (strcmp(choice, "2") == 0)
         {
-            printf("Enter the month (1-12): ");
-            char month[3];
-            if (fgets(month, sizeof(month), stdin) == NULL)
-                continue;
-            month[strcspn(month, "\n")] = 0;
+            int month;
+            int year;
+            do
+            {
+                month = get_int_input("Enter the month (1-12)");
+                if (month < 1 || month > 12)
+                {
+                    printf("Invalid month. Please enter a number between 1 and 12.\n");
+                }
+            } while (month < 1 || month > 12);
+
+            do
+            {
+                year = get_int_input("Enter the year");
+                if (year < 1900 || year > 3000)
+                {
+                    printf("Invalid year. Please enter a number between 1900 and 3000.\n");
+                }
+            } while (year < 1900 || year > 3000);
 
             clear_input_buffer();
 
-            printf("Enter the year: ");
-            char year[5];
-            if (fgets(year, sizeof(year), stdin) == NULL)
-                continue;
-            year[strcspn(year, "\n")] = 0;
-
-            clear_input_buffer();
-
-            Transaction **filtered = get_transactions_by_month_year(db, user_id, atoi(month), atoi(year));
+            Transaction **filtered = get_transactions_by_month_year(db, user_id, month, year);
 
             if (filtered == NULL)
             {
                 fprintf(stderr, "Failed to fetch transactions\n");
                 printf("Pressed enter to continue...\n");
                 getchar();
-                goto exit_history_menu;
+                continue;
             }
 
             show_transactions_table(filtered);
@@ -522,47 +558,33 @@ void handle_calculator_menu()
 void handle_report_menu(sqlite3 *db, User *user)
 {
 
-    char month[3];
-    char year[5];
-
-    // ambil input dari user bulan dan tahun
-    while (1)
+    int month;
+    int year;
+    do
     {
-        printf("Enter the month (1-12): ");
+        month = get_int_input("Enter the month (1-12)");
+        if (month < 1 || month > 12)
+        {
+            printf("Invalid month. Please enter a number between 1 and 12.\n");
+        }
+    } while (month < 1 || month > 12);
 
-        if (fgets(month, sizeof(month), stdin) == NULL)
-            continue;
-        month[strcspn(month, "\n")] = 0;
-
-        clear_input_buffer();
-        int m = atoi(month);
-        if (m >= 1 && m <= 12)
-            break;
-        printf("Invalid month. Please enter 1-12.\n");
-    }
-
-    while (1)
+    do
     {
-        printf("Enter the year: ");
+        year = get_int_input("Enter the year");
+        if (year < 1900 || year > 3000)
+        {
+            printf("Invalid year. Please enter a number between 1900 and 3000.\n");
+        }
+    } while (year < 1900 || year > 3000);
 
-        if (fgets(year, sizeof(year), stdin) == NULL)
-            continue;
-        year[strcspn(year, "\n")] = 0;
-
-        clear_input_buffer();
-        int y = atoi(year);
-        if (y >= 1900 && y <= 3000)
-            break;
-        printf("Invalid year.\n");
-    }
-
-    // generate report
-    generate_report(db, user, atoi(month), atoi(year));
+    generate_report(db, user, month, year);
 }
 
 void handle_help_menu()
 {
     char choice[5];
+    int invalid = 0;
 
     while (1)
     {
@@ -576,6 +598,13 @@ void handle_help_menu()
         printf("4. Reports & Calculator\n");
         printf("5. Return to Main Menu\n");
         printf("----------------------------------------\n");
+
+        if (invalid)
+        {
+            printf("Invalid option. Please try again.\n");
+            invalid = 0;
+        }
+
         printf("Select a topic (1-5): ");
 
         if (fgets(choice, sizeof(choice), stdin) == NULL)
@@ -665,8 +694,8 @@ void handle_help_menu()
 
         else
         {
-            printf("Invalid selection. Please try again.\n");
-            SLEEP_SECONDS(2);
+            printf("\nInvalid selection. Please try again.\n");
+            invalid = 1;
         }
     }
 }

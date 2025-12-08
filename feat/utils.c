@@ -113,22 +113,71 @@ int get_yes_or_no_input(char *question, int default_value) {
     }
 }
 
-int get_int_input(char *question){
-    int input;
-    printf("%s: ", question);
-    scanf("%d", &input);
-    clear_input_buffer();
-    return input;
+void trim_newline(char *str) {
+    size_t len = strlen(str);
+    if (len > 0 && str[len - 1] == '\n') {
+        str[len - 1] = '\0';
+    }
 }
 
-double get_double_input(char *question){
-    double input;
-    printf("%s (use point for decimal): ", question);
-    scanf("%lf", &input);
-    clear_input_buffer();
-    return input;
+int get_int_input(char *question) {
+    char buffer[1024]; // Large buffer to hold user input
+    char *endptr;
+    long value;
+
+    while (1) {
+        printf("%s: ", question);
+
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            return 0; 
+        }
+
+        if (buffer[0] == '\n') {
+            printf("Error: Input cannot be empty. Try again.\n");
+            continue;
+        }
+
+        trim_newline(buffer);
+
+        value = strtol(buffer, &endptr, 10);
+
+
+        if (endptr == buffer || *endptr != '\0') {
+            printf("Error: Invalid integer. Please enter a whole number.\n");
+        } else {
+            return (int)value;
+        }
+    }
 }
 
+double get_double_input(char *question) {
+    char buffer[1024];
+    char *endptr;
+    double value;
+
+    while (1) {
+        printf("%s (use point for decimal): ", question);
+
+        if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+            return 0.0;
+        }
+
+        if (buffer[0] == '\n') {
+            printf("Error: Input cannot be empty. Try again.\n");
+            continue;
+        }
+
+        trim_newline(buffer);
+
+        value = strtod(buffer, &endptr);
+
+        if (endptr == buffer || *endptr != '\0') {
+            printf("Error: Invalid number. Please enter a valid decimal.\n");
+        } else {
+            return value;
+        }
+    }
+}
 void clear_input_buffer(){
     char c;
     while ((c = getchar()) != '\n' && c != EOF) {}
