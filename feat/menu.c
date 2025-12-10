@@ -475,7 +475,7 @@ void handle_history_menu(sqlite3 *db, int user_id)
                 }
             } while (year < 1900 || year > 3000);
 
-            clear_input_buffer();
+            // printf("DEBUG: Year %d accepted! Moving on...\n", year);
 
             Transaction **filtered = get_transactions_by_month_year(db, user_id, month, year);
 

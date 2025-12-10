@@ -59,7 +59,6 @@ void show_onboarding()
     printf("----------------------------------------\n" COLOR_RESET);
 }
 
-
 // menerima folder dan filename
 void init(char *folder, char *filename)
 {
@@ -115,7 +114,7 @@ void init(char *folder, char *filename)
         close_db(db);
         exit(1);
     }
-    
+
     // tinggu 5 detik agar user dapat diberikan ruang waktu
     SLEEP_SECONDS(3);
     // TODO: ASK About Login info
@@ -145,9 +144,23 @@ username_input:
         }
     }
 
+    if (strlen(username) > 64)
+    {
+        fprintf(stderr, "Username is too long! please try again!\n");
+        strcpy(username, "");
+        goto username_input;
+    }
+
+    if (strlen(username) == 0)
+    {
+        fprintf(stderr, "Username cannot be empty! please try again!\n");
+        strcpy(username, "");
+        goto username_input;
+    }
+
     if (!valid)
     {
-        fprintf(stderr, "Username contains illegal character! please try again!\n");
+        fprintf(stderr, "Username contains illegal character! please try again!\n\n");
         strcpy(username, "");
         goto username_input;
     }
@@ -181,7 +194,7 @@ username_input:
     // jika sudah ada munculkan error
     if (count != 0)
     {
-        fprintf(stderr, "Username already exist! please try again!");
+        fprintf(stderr, "Username already exist! please try again!\n");
         strcpy(username, "");
         // goto dipakai untuk pengganti while loop, lebih mudah dibaca
         goto username_input;
@@ -214,6 +227,38 @@ password_input:
             valid = 0;
             break;
         }
+    }
+
+    if (strlen(password) > 64)
+    {
+        fprintf(stderr, "Password is too long! please try again!\n");
+        strcpy(password, "");
+        strcpy(confirmation, "");
+        goto password_input;
+    }
+
+    if (strlen(password) == 0)
+    {
+        fprintf(stderr, "Password cannot be empty! please try again!\n");
+        strcpy(password, "");
+        strcpy(confirmation, "");
+        goto password_input;
+    }
+
+    if (strlen(confirmation) > 64)
+    {
+        fprintf(stderr, "Confirmation Password is too long! please try again!\n");
+        strcpy(password, "");
+        strcpy(confirmation, "");
+        goto password_input;
+    }
+
+    if (strlen(confirmation) == 0)
+    {
+        fprintf(stderr, "Confirmation Password cannot be empty! please try again!\n");
+        strcpy(password, "");
+        strcpy(confirmation, "");
+        goto password_input;
     }
 
     if (!valid)

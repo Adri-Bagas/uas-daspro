@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <ctype.h>
 #ifdef _WIN32
     #include <conio.h>
     #include <direct.h>
@@ -115,7 +116,13 @@ int get_yes_or_no_input(char *question, int default_value) {
 
 void trim_newline(char *str) {
     size_t len = strlen(str);
+
     if (len > 0 && str[len - 1] == '\n') {
+        str[len - 1] = '\0';
+        len--; // Update length
+    }
+    
+    if (len > 0 && str[len - 1] == '\r') {
         str[len - 1] = '\0';
     }
 }
@@ -140,7 +147,6 @@ int get_int_input(char *question) {
         trim_newline(buffer);
 
         value = strtol(buffer, &endptr, 10);
-
 
         if (endptr == buffer || *endptr != '\0') {
             printf("Error: Invalid integer. Please enter a whole number.\n");

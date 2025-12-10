@@ -58,9 +58,21 @@ login_username_input:
     }
   }
 
+  if (strlen(username) > 64) {
+    fprintf(stderr, "Username is too long! please try again!\n");
+    strcpy(username, "");
+    goto login_username_input;
+  }
+
+  if (strlen(username) == 0) {
+    fprintf(stderr, "Username cannot be empty! please try again!\n");
+    strcpy(username, "");
+    goto login_username_input;
+  }
+
   if (!valid) {
-    fprintf(stderr, "Username contains illegal character! please try again!");
-    memset(username, 0, sizeof(username));
+    fprintf(stderr, "Username contains illegal character! please try again!\n");
+    strcpy(username, "");
     goto login_username_input;
   }
 
@@ -80,9 +92,21 @@ login_password_input:
     }
   }
 
+  if (strlen(password) > 64) {
+    fprintf(stderr, "Password is too long! please try again!\n");
+    strcpy(password, "");
+    goto login_password_input;
+  }
+
+  if (strlen(password) == 0) {
+    fprintf(stderr, "Password cannot be empty! please try again!\n");
+    strcpy(password, "");
+    goto login_password_input;
+  }
+
   if (!valid) {
-    fprintf(stderr, "Password contains illegal character! please try again!");
-    memset(password, 0, sizeof(password));
+    fprintf(stderr, "Password contains illegal character! please try again!\n");
+    strcpy(password, "");
     goto login_password_input;
   }
 
